@@ -39,6 +39,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2004/01/24 11:54:16  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.5  2003/12/19 11:11:28  mihad
 // Compact PCI Hot Swap support added.
 // New testcases added.
@@ -304,9 +307,14 @@
         Xilinx's Vendor_ID is 10EEh and Altera's Vendor_ID is 1172h). Device_ID and Revision_ID should be used
         together by application.
     -----------------------------------------------------------------------------------------------------------*/
-    `define HEADER_VENDOR_ID    16'h2321
-    `define HEADER_DEVICE_ID    16'h0001
-    `define HEADER_REVISION_ID  8'h01
+    `define HEADER_VENDOR_ID        16'h1895
+    `define HEADER_DEVICE_ID        16'h0001
+    `define HEADER_REVISION_ID      8'h01
+    `define HEADER_SUBSYS_VENDOR_ID 16'h1895
+    `define HEADER_SUBSYS_ID        16'h0001
+    `define HEADER_MAX_LAT          8'h1a
+    `define HEADER_MIN_GNT          8'h08
+
     
     // MAX Retry counter value for WISHBONE Master state-machine
     //  This value is 8-bit because of 8-bit retry counter !!!

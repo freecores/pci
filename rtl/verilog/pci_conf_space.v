@@ -43,6 +43,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.6  2003/12/28 09:54:48  fr2201
 // def_wb_imagex_addr_map  defined correctly
 //
@@ -359,8 +362,11 @@ PCI CONFIGURATION SPACE HEADER (type 00h) registers
 	together by application. Class_Code has 3 bytes to define BASE class (06h for PCI Bridge), SUB class
 	(00h for HOST type, 80h for Other Bridge type) and Interface type (00h for normal).
 -----------------------------------------------------------------------------------------------------------*/
-			parameter			r_vendor_id = `HEADER_VENDOR_ID ;	// 16'h2321 = 16'd8993 !!!
-			parameter			r_device_id = `HEADER_DEVICE_ID ;
+            reg [15: 0] r_vendor_id         ;
+            reg [15: 0] r_device_id         ;
+            reg [15: 0] r_subsys_vendor_id  ;
+            reg [15: 0] r_subsys_id         ;
+
 			reg					command_bit8 ;
 			reg					command_bit6 ;
 			reg		[2 : 0]		command_bit2_0 ;
@@ -384,7 +390,8 @@ PCI CONFIGURATION SPACE HEADER (type 00h) registers
             wire                r_status_bit4 = 0 ;
 `endif
 
-			parameter			r_revision_id = `HEADER_REVISION_ID ;
+            reg     [ 7: 0]     r_revision_id   ;
+
 `ifdef		HOST
 			parameter			r_class_code = 24'h06_00_00 ;
 `else
@@ -423,8 +430,8 @@ PCI CONFIGURATION SPACE HEADER (type 00h) registers
 			// REG			r_cap_list_pointer				NOT implemented !!!
 			reg		[7 : 0]	interrupt_line ;
 			parameter		r_interrupt_pin = 8'h01 ;
-			parameter		r_min_gnt = 8'h08 ;
-			parameter		r_max_lat = 8'h1a ;
+			reg     [7 : 0] r_min_gnt   ;
+            reg     [7 : 0] r_max_lat   ;
 
 
 /*###########################################################################################################
@@ -845,7 +852,8 @@ end
 
     always@(r_conf_address_in or
     		status_bit15_11 or status_bit8 or r_status_bit4 or command_bit8 or command_bit6 or command_bit2_0 or
-    		latency_timer or cache_line_size_reg or
+    		latency_timer or cache_line_size_reg or r_vendor_id or r_device_id or r_revision_id or
+            r_subsys_vendor_id or r_subsys_id or r_max_lat or r_min_gnt or
     		pci_ba0_bit31_12 or
     		pci_img_ctrl0_bit2_1 or pci_am0 or pci_ta0 or pci_ba0_bit0 or
     		pci_img_ctrl1_bit2_1 or pci_am1 or pci_ta1 or pci_ba1_bit31_12 or pci_ba1_bit0 or
@@ -924,6 +932,10 @@ end
     		r_conf_data_out[(31-`PCI_NUM_OF_DEC_ADDR_LINES):1] = 0 ;
     		r_conf_data_out[0] = pci_ba5_bit0 & pci_am5[31];
     	end
+        8'hB:
+        begin
+            r_conf_data_out = {r_subsys_id, r_subsys_vendor_id} ;
+        end
     `ifdef PCI_CPCI_HS_IMPLEMENT
         8'hD:
         begin
@@ -1170,11 +1182,13 @@ reg [ 7: 0] spoci_reg_num ;
 wire [11: 0] w_conf_address = init_complete ? w_conf_address_in : {2'b00, spoci_reg_num, 2'b00} ;
 `else
 wire [11: 0] w_conf_address = w_conf_address_in ;
+wire [ 7: 0] spoci_reg_num = 'hff ;
 `endif
 
 always@(w_conf_address or
 		status_bit15_11 or status_bit8 or r_status_bit4 or command_bit8 or command_bit6 or command_bit2_0 or
-		latency_timer or cache_line_size_reg or
+		latency_timer or cache_line_size_reg or r_vendor_id or r_device_id or r_revision_id or
+        r_subsys_id or r_subsys_vendor_id or r_max_lat or r_min_gnt or
 		pci_ba0_bit31_12 or
 		pci_img_ctrl0_bit2_1 or pci_am0 or pci_ta0 or pci_ba0_bit0 or
 		pci_img_ctrl1_bit2_1 or pci_am1 or pci_ta1 or pci_ba1_bit31_12 or pci_ba1_bit0 or
@@ -1274,6 +1288,12 @@ begin
     	w_conf_data_out[0] = pci_ba5_bit0 & pci_am5[31];
 		w_reg_select_dec = 57'h000_0000_0100_0000 ; // The same for another address
 	end
+    8'hB:
+    begin
+        w_conf_data_out = {r_subsys_id, r_subsys_vendor_id} ;
+        w_reg_select_dec = 57'h000_0000_0000_0000 ;
+    end
+
 `ifdef PCI_CPCI_HS_IMPLEMENT
     8'hD:
     begin
@@ -1657,6 +1677,7 @@ wire init_we        = 1'b0  ;
 wire init_cfg_done  = 1'b1  ;
 wire [31: 0] w_conf_data    = w_conf_data_in ;
 wire [ 3: 0] w_byte_en      = w_byte_en_in   ;
+wire [31: 0] spoci_dat      = 'h0000_0000    ;
 `endif
 
 // Reduced write data for BASE, MASK and TRANSLATION registers of PCI and WB images
@@ -2386,6 +2407,48 @@ after this ALWAYS block!!! (for every register bit, there are two D-FF implement
         if (rst_inactive & ~init_complete & init_cfg_done)
             init_complete <= 1'b1 ;
 	end
+end
+
+// implementation of read only device identification registers
+always@(posedge w_clock or posedge reset)
+begin
+    if (reset)
+    begin
+        r_vendor_id         <= `HEADER_VENDOR_ID        ;
+        r_device_id         <= `HEADER_DEVICE_ID        ;
+        r_revision_id       <= `HEADER_REVISION_ID      ;
+        r_subsys_vendor_id  <= `HEADER_SUBSYS_VENDOR_ID ;
+        r_subsys_id         <= `HEADER_SUBSYS_ID        ;
+        r_max_lat           <= `HEADER_MAX_LAT          ;
+        r_min_gnt           <= `HEADER_MIN_GNT          ;
+    end else
+    begin
+        if (init_we)
+        begin
+            if (spoci_reg_num == 'h0)
+            begin
+                r_vendor_id <= spoci_dat[15: 0] ;
+                r_device_id <= spoci_dat[31:16] ;
+            end
+
+            if (spoci_reg_num == 'hB)
+            begin
+                r_subsys_vendor_id  <= spoci_dat[15: 0] ;
+                r_subsys_id         <= spoci_dat[31:16] ;
+            end
+
+            if (spoci_reg_num == 'h2)
+            begin
+                r_revision_id   <= spoci_dat[ 7: 0] ;
+            end
+
+            if (spoci_reg_num == 'hF)
+            begin
+                r_max_lat <= spoci_dat[31:24] ;
+                r_min_gnt <= spoci_dat[23:16] ;
+            end
+        end        
+    end
 end
 
 // This signals are synchronous resets for registers, whic occures when asynchronous RESET is '1' or
@@ -3785,7 +3848,6 @@ assign		wb_img_ctrl5[2 : 0] = wb_img_ctrl5_bit2_0 ;
 // GENERAL output from conf. cycle generation register & int. control register
 assign		config_addr[23 : 0] = { cnf_addr_bit23_2, 1'b0, cnf_addr_bit0 } ;
 assign		icr_soft_res = icr_bit31 ;
-
 
 endmodule
 			                    

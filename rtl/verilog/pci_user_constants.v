@@ -39,6 +39,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.13  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.12  2003/12/28 09:54:48  fr2201
 // def_wb_imagex_addr_map  defined correctly
 //
@@ -92,24 +95,24 @@
 // If RAM_DONT_SHARE is defined, then all RAM address lengths must be specified accordingly, otherwise there are two relevant lengths - PCI_FIFO_RAM_ADDR_LENGTH and
 // WB_FIFO_RAM_ADDR_LENGTH.
 
-`define WBW_ADDR_LENGTH 7
-`define WBR_ADDR_LENGTH 7
-`define PCIW_ADDR_LENGTH 7
-`define PCIR_ADDR_LENGTH 7
+`define WBW_ADDR_LENGTH 4
+`define WBR_ADDR_LENGTH 4
+`define PCIW_ADDR_LENGTH 4
+`define PCIR_ADDR_LENGTH 4
 
 `define FPGA
 `define XILINX
 
 //`define WB_RAM_DONT_SHARE
-//`define PCI_RAM_DONT_SHARE
+`define PCI_RAM_DONT_SHARE
 
 `ifdef FPGA
     `ifdef XILINX
-        `define PCI_FIFO_RAM_ADDR_LENGTH 8      // PCI target unit fifo storage definition
+        `define PCI_FIFO_RAM_ADDR_LENGTH 4      // PCI target unit fifo storage definition
         `define WB_FIFO_RAM_ADDR_LENGTH 8       // WB slave unit fifo storage definition
-        `define PCI_XILINX_RAMB4
+        //`define PCI_XILINX_RAMB4
         `define WB_XILINX_RAMB4
-        //`define PCI_XILINX_DIST_RAM
+        `define PCI_XILINX_DIST_RAM
         //`define WB_XILINX_DIST_RAM
     `endif
 `else
@@ -209,7 +212,7 @@
 // allows for maximum image size ( number = 1, image size = 2GB ). If you intend on using different sizes of WB images,
 // you have to define a number of minimum sized image and enlarge others by specifying different address mask.
 // smaller the number here, faster the decoder operation
-`define WB_NUM_OF_DEC_ADDR_LINES 20
+`define WB_NUM_OF_DEC_ADDR_LINES 1
 
 // no. of WISHBONE Slave IMAGES
 // WB image 0 is always used for access to configuration space. In case configuration space access is not implemented,
@@ -220,6 +223,7 @@
 `define WB_IMAGE3
 `define WB_IMAGE4
 `define WB_IMAGE5
+
 //Address bar register defines the base address for each image.
 //To asccess bus without Software configuration.
 `define  WB_BA1	20'h0000_0
@@ -262,7 +266,7 @@
 // addresses will pass through bridge unchanged, regardles of address translation enable bits.
 // Address translation also slows down the decoding
 //When  ADDR_TRAN_IMPL this define is present then adress translation is enabled after reset.
-`define ADDR_TRAN_IMPL
+//`define ADDR_TRAN_IMPL
 
 // decode speed for WISHBONE definition - initial cycle on WISHBONE bus will take 1 WS for FAST, 2 WSs for MEDIUM and 3 WSs for slow.
 // slower decode speed can be used, to provide enough time for address to be decoded.
@@ -282,8 +286,8 @@
 Core speed definition - used for simulation and 66MHz Capable bit value in status register indicating 66MHz
 capable device
 -----------------------------------------------------------------------------------------------------------*/
-`define PCI33
-//`define PCI66
+//`define PCI33
+`define PCI66
 
 /*-----------------------------------------------------------------------------------------------------------
 [000h-00Ch] First 4 DWORDs (32-bit) of PCI configuration header - the same regardless of the HEADER type !
@@ -291,9 +295,13 @@ capable device
 	Xilinx's Vendor_ID is 10EEh and Altera's Vendor_ID is 1172h). Device_ID and Revision_ID should be used
 	together by application.
 -----------------------------------------------------------------------------------------------------------*/
-`define HEADER_VENDOR_ID    16'h1895
-`define HEADER_DEVICE_ID    16'h0001
-`define HEADER_REVISION_ID  8'h01
+`define HEADER_VENDOR_ID        16'h1895
+`define HEADER_DEVICE_ID        16'h0001
+`define HEADER_REVISION_ID      8'h01
+`define HEADER_SUBSYS_VENDOR_ID 16'h1895
+`define HEADER_SUBSYS_ID        16'h0001
+`define HEADER_MAX_LAT          8'h1a
+`define HEADER_MIN_GNT          8'h08
 
 // MAX Retry counter value for WISHBONE Master state-machine
 // 	This value is 8-bit because of 8-bit retry counter !!!
@@ -310,3 +318,4 @@ capable device
     `define PCI_CPCI_HS_IMPLEMENT
     `define PCI_SPOCI
 `endif
+

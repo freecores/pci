@@ -39,6 +39,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.25  2004/03/19 16:36:26  mihad
+// Single PCI Master write fix.
+//
 // Revision 1.24  2004/01/24 11:54:16  mihad
 // Update! SPOCI Implemented!
 //
@@ -11830,6 +11833,7 @@ task test_initial_all_conf_values;
     reg [31:0] expected_value ;
     reg        failed ;
     reg [31:0] reg_value  [0:`ISR_ADDR]  ;
+    reg [31:0] header_value[0:15] ;
     reg [5:0] reg_address  ;
     integer t_i;
 
@@ -11844,6 +11848,49 @@ begin
       reg_value[t_i]=31'h0;      
        t_i= t_i+1;
     end
+
+    t_i = 0 ;
+    while(t_i < 16)
+    begin
+        header_value[t_i] = 0 ;
+        t_i = t_i + 1 ;
+    end
+
+    // fill header register values
+    header_value[0] = {`HEADER_DEVICE_ID, `HEADER_VENDOR_ID} ;
+
+    // determine the expected value of status and control registers
+    tmp_reg_val = 'h0 ;
+    tmp_reg_val[10+16:9+16] = 'b01 ; // devsel timing
+    tmp_reg_val[7+16] = 1'b1 ;     // fast b2b capable
+`ifdef PCI66
+    tmp_reg_val[5+16] = 1'b1 ;    // 66MHz capable
+`endif
+
+`ifdef GUEST
+    `ifdef PCI_CPCI_HS_IMPLEMENT
+        tmp_reg_val[4+16] = 1'b1 ;
+    `endif
+`endif
+
+    header_value[1] = tmp_reg_val ;
+
+    // class code, revision ID register
+    tmp_reg_val = 'h0 ;
+    tmp_reg_val[31:24] = 'h06 ;
+    tmp_reg_val[7:0] = `HEADER_REVISION_ID ;
+`ifdef GUEST
+    tmp_reg_val[23:16] = 'h80 ;
+`endif
+    header_value[2] = tmp_reg_val ;
+
+    header_value[11] = {`HEADER_SUBSYS_ID, `HEADER_SUBSYS_VENDOR_ID} ;
+`ifdef PCI_CPCI_HS_IMPLEMENT
+    header_value[13] = `PCI_CAP_PTR_VAL ;
+`endif
+
+    header_value[15] = {`HEADER_MAX_LAT, `HEADER_MIN_GNT, 8'h01, 8'h00} ;
+
 ////PCI register
    `ifdef HOST
 
@@ -11853,7 +11900,11 @@ begin
         reg_value[0 ]= `PCI_AT_EN0 << 2 ;          //PCi Control         Register0
       
        if (`PCI_AM0)
+       begin
         reg_value[1 ]=`PCI_BA0_MEM_IO;       //PCi Base Address    Register0 
+        header_value[4] = `PCI_BA0_MEM_IO ;
+       end
+
        tmp_reg_val={`PCI_AM0, 12'h000} ;
        tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
        reg_value[2 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -11877,7 +11928,10 @@ begin
        reg_value[4 ]=`PCI_AT_EN1 << 2 ;          //PCi Control         Register1
 
     if (`PCI_AM1)
+    begin
       reg_value[5 ]={ 31'h0,`PCI_BA1_MEM_IO}; //PCi Base Address    Register1 
+      header_value[5] = `PCI_BA1_MEM_IO ;
+    end
     tmp_reg_val={`PCI_AM1, 12'h000} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[6 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -11889,7 +11943,10 @@ begin
     reg_value[8 ]=`PCI_AT_EN2 << 2;          //PCi Control         Register2
     
     if (`PCI_AM2)                        //PCi Base Address    Register2
-    reg_value[9 ]={31'h0,`PCI_BA2_MEM_IO};
+    begin
+      reg_value[9 ]={31'h0,`PCI_BA2_MEM_IO};
+      header_value[6] = `PCI_BA2_MEM_IO ;
+    end
     tmp_reg_val={`PCI_AM2, 12'h000} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[10 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -11903,7 +11960,10 @@ begin
     reg_value[12]=`PCI_AT_EN3 << 2;          //PCi Control         Register3
     
     if (`PCI_AM3)                        //PCi Base Address    Register3
-    reg_value[13]={31'h000,`PCI_BA3_MEM_IO};
+    begin
+      reg_value[13]={31'h000,`PCI_BA3_MEM_IO};
+      header_value[7] = `PCI_BA3_MEM_IO ;
+    end
     tmp_reg_val={`PCI_AM3, 12'h000} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[14 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -11917,7 +11977,10 @@ begin
     reg_value[16]=`PCI_AT_EN4 << 2;          //PCi Control         Register4
     
     if (`PCI_AM4)                        //PCi Base Address    Register4 
-    reg_value[17]={31'h000,`PCI_BA4_MEM_IO};    
+    begin
+      reg_value[17]={31'h000,`PCI_BA4_MEM_IO};    
+      header_value[8] = `PCI_BA4_MEM_IO ;
+    end
     tmp_reg_val={`PCI_AM4, 12'h000} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[18 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -11931,7 +11994,11 @@ begin
     reg_value[20]=`PCI_AT_EN5 << 2;          //PCi Control         Register5 
     
     if (`PCI_AM5)                        //PCi Base Address    Register5 
-    reg_value[21]={31'h000,`PCI_BA5_MEM_IO};  
+    begin
+      reg_value[21]={31'h000,`PCI_BA5_MEM_IO};  
+      header_value[9] = `PCI_BA5_MEM_IO ;
+    end
+
     tmp_reg_val={`PCI_AM5, 12'h000} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[22 ]=tmp_reg_val;   //PCi Address Mask    Register0
@@ -12043,39 +12110,66 @@ begin:host_regs_check
     //read registers
     reg_address=0;
     while ((reg_address <= `INT_ACK_ADDR) && (failed==0) )
-
     begin
-     if ((  reg_address !== `CNF_DATA_ADDR) && (  reg_address !== `INT_ACK_ADDR))
-     begin
-      register_offset = {1'b1, reg_address, 2'b00} ;
-      read_data`READ_ADDRESS = {`WB_CONFIGURATION_BASE,register_offset} ;
-      wishbone_master.wb_single_read(read_data, flags, read_status) ;
-     if (read_status`CYC_ACTUAL_TRANSFER !== 1)
-     begin
-        $fdisplay( tb_log_file,"error Config Register Adress %h", read_data`READ_ADDRESS);
-        $display("error Config Register Adress %h", read_data`READ_ADDRESS);
-        test_fail("read from config register didn't succeede") ;
-        failed = 1 ;
+        if ((  reg_address !== `CNF_DATA_ADDR) && (  reg_address !== `INT_ACK_ADDR))
+        begin
+            register_offset = {1'b1, reg_address, 2'b00} ;
+            read_data`READ_ADDRESS = {`WB_CONFIGURATION_BASE,register_offset} ;
+            wishbone_master.wb_single_read(read_data, flags, read_status) ;
+            if (read_status`CYC_ACTUAL_TRANSFER !== 1)
+            begin
+                $fdisplay( tb_log_file,"error Config Register Adress %h", read_data`READ_ADDRESS);
+                $display("error Config Register Adress %h", read_data`READ_ADDRESS);
+                test_fail("read from config register didn't succeede") ;
+                failed = 1 ;
+            end
+            else if( read_status`READ_DATA !== reg_value[reg_address])
+            begin
+                $fdisplay( tb_log_file,"error Config Register Adress %h",
+                         read_data`READ_ADDRESS,
+                         ," expected: %h ",reg_value[reg_address]," read: %h",read_status`READ_DATA);
+                $display("error Config Register Adress %h",
+                          read_data`READ_ADDRESS  ,
+                         ," expected: %h ",reg_value[reg_address]," read: %h",read_status`READ_DATA," Time %t ", $time) ;
+                test_fail("Initial value of register not as expected") ;
+                failed = 1 ;
+            end
+        end
+        
+        if (`P_ERR_DATA_ADDR  ==reg_address )
+            reg_address=`WB_CONF_SPC_BAR_ADDR ;
+        else
+            reg_address= reg_address+1;
 
-     end
-     else
+    end
 
-      if( read_status`READ_DATA !== reg_value[reg_address])
-      begin
-        $fdisplay( tb_log_file,"error Config Register Adress %h",
-                 read_data`READ_ADDRESS,
-                 ," expected: %h ",reg_value[reg_address]," read: %h",read_status`READ_DATA);
-        $display("error Config Register Adress %h",
-                  read_data`READ_ADDRESS  ,
-                 ," expected: %h ",reg_value[reg_address]," read: %h",read_status`READ_DATA," Time %t ", $time) ;
-        test_fail("Initial value of register not as expected") ;
-        failed = 1 ;
-      end
-     end
-      if (`P_ERR_DATA_ADDR  ==reg_address )
-        reg_address=`WB_CONF_SPC_BAR_ADDR ;
-      else
-       reg_address= reg_address+1;
+    //read registers
+    reg_address=0;
+    while ((reg_address < 'd16) && (failed==0) )
+    begin
+        register_offset = {1'b0, reg_address, 2'b00} ;
+        read_data`READ_ADDRESS = {`WB_CONFIGURATION_BASE,register_offset} ;
+        wishbone_master.wb_single_read(read_data, flags, read_status) ;
+        if (read_status`CYC_ACTUAL_TRANSFER !== 1)
+        begin
+            $fdisplay( tb_log_file,"error Config Register Adress %h", read_data`READ_ADDRESS);
+            $display("error Config Register Adress %h", read_data`READ_ADDRESS);
+            test_fail("read from config register didn't succeede") ;
+            failed = 1 ;
+        end
+        else if( read_status`READ_DATA !== header_value[reg_address])
+        begin
+            $fdisplay( tb_log_file,"error Config Register Adress %h",
+            read_data`READ_ADDRESS,
+             ," expected: %h ",header_value[reg_address]," read: %h",read_status`READ_DATA);
+            $display("error Config Register Adress %h",
+            read_data`READ_ADDRESS  ,
+             ," expected: %h ",header_value[reg_address]," read: %h",read_status`READ_DATA," Time %t ", $time) ;
+            test_fail("Initial value of register not as expected") ;
+            failed = 1 ;
+        end
+       
+        reg_address= reg_address+1;
 
     end
 end
@@ -12090,6 +12184,36 @@ begin:guest_regs_check
     integer t_max;
     reg           ok   ;
 
+    // first read the header portion using the configuration cycles
+    reg_address = 0 ;
+    while (reg_address < 'd16)
+    begin
+        configuration_cycle_read 
+        ( 
+            8'h00,                          // bus number [7:0]
+            `TAR0_IDSEL_INDEX - 11,         // device number [4:0]
+            3'h0,                           // function number [2:0]
+            reg_address,                    // register number [5:0]
+            2'h0,                           // type [1:0]
+            4'hF,                           // byte enables [3:0]
+            read_data                       // data returned from configuration read [31:0]
+        ) ;
+
+        if( read_data !== header_value[reg_address])
+        begin
+            $fdisplay( tb_log_file,"error Config Register Adress %h",
+                 {4'h0, reg_address ,2'b00},
+                 ," expected:%h ",header_value[reg_address]," read:%h",read_data);
+            $display("error Config Register Adress %h",
+                 {4'h0, reg_address ,2'b00},
+                 ," expected:%h ",header_value[reg_address]," read:%h",read_data," Time %t ", $time) ;
+            test_fail("Initial value of register not as expected") ;
+            failed = 1 ;
+        end
+
+        reg_address= reg_address+1;
+    end
+    
     configure_bridge_target;//Target must be configured to read the other bars 
 
     reg_address=0;
@@ -12113,6 +12237,7 @@ begin:guest_regs_check
        reg_address= reg_address+1;
 
     end
+
     //clearing  all TA's for later tests
     reg_address=`P_TA0_ADDR;
     while ((reg_address <= `W_TA5_ADDR) && (failed==0) )
@@ -12136,7 +12261,8 @@ if (!failed)
 `endif
 
 end
-endtask //
+endtask
+
 task test_initial_conf_values ;
     reg [11:0] register_offset ;
     reg [31:0] expected_value ;
@@ -15990,7 +16116,7 @@ begin
     if (ok === 1'b1)
         test_ok ;
 
-    test_name = "SERIAL EPROM PRESENT AFTER RESET, HOLDS P_BA0 AND PCI COMMAND REGISTER VALUES" ;
+    test_name = "SERIAL EPROM PRESENT AFTER RESET, HOLDS P_BA0, PCI COMMAND AND ID REGISTER VALUES" ;
 
     do_pause ( 10 ) ;
 
@@ -16020,7 +16146,44 @@ begin
     i_i2c_slave_model.mem[8] = read_data[23:16] ;
     i_i2c_slave_model.mem[9] = read_data[31:24] ;
 
-    i_i2c_slave_model.mem[10] = 'hff ;
+    read_data[15: 0] = `HEADER_VENDOR_ID + 'h1 ;
+    read_data[31:16] = `HEADER_DEVICE_ID + 'h2 ;
+    
+    i_i2c_slave_model.mem[10] = 'h0 ;
+    i_i2c_slave_model.mem[11] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[12] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[13] = read_data[23:16] ;
+    i_i2c_slave_model.mem[14] = read_data[31:24] ;
+
+    read_data[15: 0] = `HEADER_SUBSYS_VENDOR_ID + 'h3 ;
+    read_data[31:16] = `HEADER_SUBSYS_ID        + 'h4 ;
+    
+    i_i2c_slave_model.mem[15] = 'h2c >> 2 ;
+    i_i2c_slave_model.mem[16] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[17] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[18] = read_data[23:16] ;
+    i_i2c_slave_model.mem[19] = read_data[31:24] ;
+
+    read_data[ 7: 0] = `HEADER_REVISION_ID + 'h5 ;
+    read_data[31: 8] = $random            ;
+    
+    i_i2c_slave_model.mem[20] = 'h8 >> 2 ;
+    i_i2c_slave_model.mem[21] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[22] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[23] = read_data[23:16] ;
+    i_i2c_slave_model.mem[24] = read_data[31:24] ;
+
+    read_data[31:24] = ~(`HEADER_MAX_LAT) ;
+    read_data[23:16] = ~(`HEADER_MIN_GNT) ;
+    read_data[15: 0] = 'hffff ;
+    
+    i_i2c_slave_model.mem[25] = 'h3c >> 2 ;
+    i_i2c_slave_model.mem[26] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[27] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[28] = read_data[23:16] ;
+    i_i2c_slave_model.mem[29] = read_data[31:24] ;
+
+    i_i2c_slave_model.mem[30] = 'hff ;
 
     fork
     begin
@@ -16069,7 +16232,7 @@ begin
         end
 
         // now wait for 12c eprom to transmit all configured bytes
-        repeat(11)
+        repeat(31)
         begin
             wait(i_i2c_slave_model.acc_done === 1'b0) ;
             wait(i_i2c_slave_model.acc_done === 1'b1) ;
@@ -16180,15 +16343,95 @@ begin
     if (read_data !== (Target_Base_Addr_R[0] & {{`PCI_NUM_OF_DEC_ADDR_LINES{1'b1}}, {(32 - `PCI_NUM_OF_DEC_ADDR_LINES){1'b0}}} ) )
     begin
         $display("Time %t", $time) ;
-        $display("Read from serial eprom control and status register returned unexpected data value") ;
-        test_fail("Read from serial eprom control and status register returned unexpected data value") ;
+        $display("Read from PCI BAR0 register returned unexpected data value") ;
+        test_fail("Read from PCI BAR0 register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h0, 4'hF, read_data) ;
+
+    if (read_data[15: 0] !== (`HEADER_VENDOR_ID + 'h1))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from VendorID register returned unexpected data value") ;
+        test_fail("Read from VendorID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[31:16] !== (`HEADER_DEVICE_ID + 'h2))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from DeviceID register returned unexpected data value") ;
+        test_fail("Read from DeviceID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+    
+    config_read('h2c, 4'hF, read_data) ;
+
+    if (read_data[15: 0] !== (`HEADER_SUBSYS_VENDOR_ID + 'h3))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from SubsystemVendorID register returned unexpected data value") ;
+        test_fail("Read from SubsystemVendorID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[31:16] !== (`HEADER_SUBSYS_ID + 'h4))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from SubsystemID register returned unexpected data value") ;
+        test_fail("Read from SubsystemID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h8, 4'hF, read_data) ;
+
+    if (read_data[ 7: 0] !== (`HEADER_REVISION_ID + 'h5))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from RevisionID register returned unexpected data value") ;
+        test_fail("Read from RevisionID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[31: 8] !== 'h06_80_00)
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from ClassCode register returned unexpected data value") ;
+        test_fail("Read from ClassCode register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h3c, 4'hF, read_data) ;
+
+    if (read_data[31:24] !== ~(`HEADER_MAX_LAT))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from MaxLatency register returned unexpected data value") ;
+        test_fail("Read from MaxLatency register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[23:16] !== ~(`HEADER_MIN_GNT))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from MinGnt register returned unexpected data value") ;
+        test_fail("Read from MinGnt register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[15: 0] !== 'h01ff)
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from IntPin/IntLine register returned unexpected data value") ;
+        test_fail("Read from IntPin/IntLine register returned unexpected data value") ;
         ok = 1'b0 ;
     end
 
     if (ok)
         test_ok ;
 
-    test_name = "SERIAL EPROM PRESENT AFTER RESET, HOLDS ALL *_BA*, *_AM* AND PCI COMMAND REGISTER VALUES" ;
+    test_name = "SERIAL EPROM PRESENT AFTER RESET, HOLDS ALL *_BA*, *_AM*, PCI COMMAND AND ID REGISTER VALUES" ;
 
     do_pause ( 10 ) ;
 
@@ -16436,7 +16679,37 @@ begin
     i_i2c_slave_model.mem[148] =  image_base[23:16]          ;
     i_i2c_slave_model.mem[149] =  image_base[31:24]          ;
 
-    i_i2c_slave_model.mem[150] = 'hff   ;
+    read_data[15: 0] = `HEADER_VENDOR_ID    ;
+    read_data[31:16] = `HEADER_DEVICE_ID    ;
+    read_data = ~read_data ;
+    
+    i_i2c_slave_model.mem[150] = 'h0 ;
+    i_i2c_slave_model.mem[151] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[152] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[153] = read_data[23:16] ;
+    i_i2c_slave_model.mem[154] = read_data[31:24] ;
+
+    read_data[15: 0] = `HEADER_SUBSYS_VENDOR_ID    ;
+    read_data[31:16] = `HEADER_SUBSYS_ID           ;
+    read_data = ~read_data ;
+
+    i_i2c_slave_model.mem[155] = 'h2c >> 2 ;
+    i_i2c_slave_model.mem[156] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[157] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[158] = read_data[23:16] ;
+    i_i2c_slave_model.mem[159] = read_data[31:24] ;
+
+    read_data[ 7: 0] = `HEADER_REVISION_ID ;
+    read_data[31: 8] = $random      ;
+    read_data = ~read_data ;
+    
+    i_i2c_slave_model.mem[160] = 'h8 >> 2 ;
+    i_i2c_slave_model.mem[161] = read_data[ 7: 0] ;
+    i_i2c_slave_model.mem[162] = read_data[15: 8] ;
+    i_i2c_slave_model.mem[163] = read_data[23:16] ;
+    i_i2c_slave_model.mem[164] = read_data[31:24] ;
+
+    i_i2c_slave_model.mem[165] = 'hff   ;
 
     fork
     begin
@@ -16485,7 +16758,7 @@ begin
         end
 
         // now wait for 12c eprom to transmit all configured bytes
-        repeat(151)
+        repeat(166)
         begin
             wait(i_i2c_slave_model.acc_done === 1'b0) ;
             wait(i_i2c_slave_model.acc_done === 1'b1) ;
@@ -16857,6 +17130,44 @@ begin
         $display("Time %t", $time) ;
         $display("Read from serial eprom control and status register returned unexpected data value") ;
         test_fail("Read from serial eprom control and status register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h0, 4'hF, read_data) ;
+
+    if (read_data !== ~{`HEADER_DEVICE_ID, `HEADER_VENDOR_ID})
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from VendorID, DeviceID register returned unexpected data value") ;
+        test_fail("Read from VendorID, DeviceID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h2c, 4'hF, read_data) ;
+
+    if (read_data !== ~{`HEADER_SUBSYS_ID, `HEADER_SUBSYS_VENDOR_ID})
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from SubsystemVendorID, SubsystemID register returned unexpected data value") ;
+        test_fail("Read from SubsystemVendorID, SubsystemID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    config_read('h8, 4'hF, read_data) ;
+
+    if (read_data[ 7: 0] !== ~(`HEADER_REVISION_ID))
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from RevisionID register returned unexpected data value") ;
+        test_fail("Read from RevisionID register returned unexpected data value") ;
+        ok = 1'b0 ;
+    end
+
+    if (read_data[31: 8] !== 'h06_80_00)
+    begin
+        $display("Time %t", $time) ;
+        $display("Read from ClassCode register returned unexpected data value") ;
+        test_fail("Read from ClassCode register returned unexpected data value") ;
         ok = 1'b0 ;
     end
 
