@@ -39,6 +39,10 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.27  2004/08/19 15:27:31  mihad
+// Changed minimum pci image size to 256 bytes because
+// of some PC system problems with size of IO images.
+//
 // Revision 1.26  2004/07/07 12:45:02  mihad
 // Added SubsystemVendorID, SubsystemID, MAXLatency, MinGnt defines.
 // Enabled value loading from serial EEPROM for all of the above + VendorID and DeviceID registers.
@@ -1618,6 +1622,54 @@ begin:main
         end
     end 
     join 
+
+    test_name = "MULTIPLE NORMAL SINGLE MEMORY READS, SAME ADDRESS, CHANGE DATA" ;
+
+    i = 32'hFFFF_FFFF ;
+
+    // read written data back
+    read_data`READ_ADDRESS  = target_address  + ({$random} % 4)  + 72 ;
+    read_data`READ_SEL      = 4'hF ;
+    write_flags`WB_TRANSFER_AUTO_RTY = 1'b1 ;
+
+    fork
+    begin
+
+        repeat(5)
+        begin
+            pci_behaviorial_device1.pci_behaviorial_target.Test_Device_Mem[72 >> 2] = $random ;
+            wishbone_master.wb_single_read( read_data, write_flags, read_status ) ;
+            if (read_status`CYC_ACTUAL_TRANSFER !== 1)
+            begin
+                $display("Image testing failed! Bridge failed to process single memory read! Time %t ", $time) ;
+                test_fail("PCI bridge didn't process the read as expected");
+                i[0] = 1'b0 ;
+            end
+
+            if (read_status`READ_DATA !== pci_behaviorial_device1.pci_behaviorial_target.Test_Device_Mem[72 >> 2])
+            begin
+                display_warning(read_data`READ_ADDRESS, pci_behaviorial_device1.pci_behaviorial_target.Test_Device_Mem[72 >> 2], read_status`READ_DATA) ;
+                test_fail("PCI bridge returned unexpected Read Data");
+                i[0] = 1'b0 ;
+            end
+            write_flags`WB_FAST_B2B = 1'b1 ;
+        end
+
+        if (i === 32'hFFFF_FFFF)
+            test_ok ;
+    end
+    begin
+        repeat(5)
+        begin
+            pci_transaction_progress_monitor( read_data`READ_ADDRESS & 32'hffff_fffc, `BC_MEM_READ, 1, 0, 1, 0, 0, ok ) ;
+            if ( ok !== 1 )
+            begin
+                i[1] = 1'b0 ;
+                test_fail("because single memory read from WB to PCI didn't engage expected transaction on PCI bus") ;
+            end
+        end
+    end
+    join
  
     test_name = "MULTIPLE NON-CONSECUTIVE SINGLE MEMORY WRITES THROUGH WISHBONE SLAVE UNIT" ;
     begin:non_consecutive_single_writes_test_blk
@@ -1630,6 +1682,7 @@ begin:main
         write_data`WRITE_SEL             = 4'hF ;
         write_flags`WB_TRANSFER_AUTO_RTY = 1'b1 ;
         write_flags`WB_TRANSFER_CAB      = 1'b0 ;
+        write_flags`WB_FAST_B2B = 1'b0 ;
           
         rnd_seed = 32'h12fe_dc34 ;
             
@@ -16098,7 +16151,7 @@ begin
 
     config_read( {4'h1, `P_BA1_ADDR, 2'b00}, 4'hF, read_data ) ;
 
-    if (read_data !== 32'h0000_0000)
+    if (read_data !== {31'h0000_0000, `PCI_BA1_MEM_IO})
     begin
         $display("Time %t", $time) ;
         $display("Invalid value read from P_BA1 register") ;
@@ -21101,6 +21154,58 @@ begin:main
     begin
         expect_length_wr = Set_size ;
     end
+
+    test_name = "MULTIPLE SINGLE MEMORY READS THROUGH PCI TARGET UNIT, SAME ADDRESS, CHANGE DATA" ;
+
+    master2_check_received_data = 1 ;
+    master1_check_received_data = 1 ;
+
+    fork
+    begin
+        repeat(5)
+        begin
+            wishbone_slave.wb_memory[expect_address[21:2]] = $random ;
+            PCIU_READ (Master_ID[2:0], Address,
+                        `BC_MEM_READ, wishbone_slave.wb_memory[expect_address[21:2]], `Test_All_Bytes,
+                        1, `Test_One_Zero_Master_WS, `Test_One_Zero_Target_WS,
+                        `Test_Devsel_Medium, `Test_Target_Start_Delayed_Read);
+
+            do_pause(1) ;
+
+            wb_transaction_stop( Set_prefetch_enable ? Cache_lsize : 1 ) ;
+            
+            @(posedge wb_clock) ;
+            do_pause( 2 ) ;
+
+            PCIU_READ (Master_ID[2:0], Address,
+                       `BC_MEM_READ, wishbone_slave.wb_memory[expect_address[21:2]], `Test_All_Bytes,
+                       1, `Test_One_Zero_Master_WS, `Test_One_Zero_Target_WS,
+                       `Test_Devsel_Medium, `Test_Target_Normal_Completion);
+            do_pause(0) ;
+        end
+
+        @(posedge pci_clock) ;
+
+        while ( FRAME === 0 )
+            @(posedge pci_clock) ;
+
+        while ( IRDY === 0 )
+            @(posedge pci_clock) ;
+
+        do_pause(2) ;
+        # 1 ;
+        if (!error_monitor_done)
+            disable monitor_err_event_on_multiple_same_adr_reads_blk ;
+    end
+    begin:monitor_err_event_on_multiple_same_adr_reads_blk
+        error_monitor_done = 0 ;
+        @(error_event_int) ;
+        test_fail("either PCI Monitor or PCI Master detected an error while reading through PCI Target Unit") ;
+        ok = 0 ;
+        error_monitor_done = 1 ;
+    end
+    join
+
     // write through the PCI bridge to WB slave
     test_name = "NORMAL POSTED WRITE THROUGH PCI TARGET UNIT" ;
     $display("Memory write (%d words) through PCI bridge to WB slave!", expect_length_wr);

@@ -42,6 +42,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2004/01/24 11:54:16  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.1  2003/12/15 12:21:29  mihad
 // Moved top.v to bench directory. Removed unneeded meta_flop,
 // modified files list files accordingly.
@@ -170,6 +173,14 @@ module TOP
 `endif
 );
 
+`ifdef ACTIVE_LOW_OE
+parameter oe_act = 1'b0 ;
+`endif
+
+`ifdef ACTIVE_HIGH_OE
+parameter oe_act = 1'b1 ;
+`endif
+
 input           CLK ;
 inout   [31:0]  AD ;
 inout   [3:0]   CBE ;
@@ -264,12 +275,47 @@ wire    SDA_en  ;
 wire    [31:0]  AD_out ;
 wire    [31:0]  AD_en ;
 
+wire    [31:0]  AD_in   ;
+assign AD_in[0 ] = (AD_en[0 ] == oe_act) ? 1'bx : AD[0 ] ;
+assign AD_in[1 ] = (AD_en[1 ] == oe_act) ? 1'bx : AD[1 ] ;
+assign AD_in[2 ] = (AD_en[2 ] == oe_act) ? 1'bx : AD[2 ] ;
+assign AD_in[3 ] = (AD_en[3 ] == oe_act) ? 1'bx : AD[3 ] ;
+assign AD_in[4 ] = (AD_en[4 ] == oe_act) ? 1'bx : AD[4 ] ;
+assign AD_in[5 ] = (AD_en[5 ] == oe_act) ? 1'bx : AD[5 ] ;
+assign AD_in[6 ] = (AD_en[6 ] == oe_act) ? 1'bx : AD[6 ] ;
+assign AD_in[7 ] = (AD_en[7 ] == oe_act) ? 1'bx : AD[7 ] ;
+assign AD_in[8 ] = (AD_en[8 ] == oe_act) ? 1'bx : AD[8 ] ;
+assign AD_in[9 ] = (AD_en[9 ] == oe_act) ? 1'bx : AD[9 ] ;
+assign AD_in[10] = (AD_en[10] == oe_act) ? 1'bx : AD[10] ;
+assign AD_in[11] = (AD_en[11] == oe_act) ? 1'bx : AD[11] ;
+assign AD_in[12] = (AD_en[12] == oe_act) ? 1'bx : AD[12] ;
+assign AD_in[13] = (AD_en[13] == oe_act) ? 1'bx : AD[13] ;
+assign AD_in[14] = (AD_en[14] == oe_act) ? 1'bx : AD[14] ;
+assign AD_in[15] = (AD_en[15] == oe_act) ? 1'bx : AD[15] ;
+assign AD_in[16] = (AD_en[16] == oe_act) ? 1'bx : AD[16] ;
+assign AD_in[17] = (AD_en[17] == oe_act) ? 1'bx : AD[17] ;
+assign AD_in[18] = (AD_en[18] == oe_act) ? 1'bx : AD[18] ;
+assign AD_in[19] = (AD_en[19] == oe_act) ? 1'bx : AD[19] ;
+assign AD_in[20] = (AD_en[20] == oe_act) ? 1'bx : AD[20] ;
+assign AD_in[21] = (AD_en[21] == oe_act) ? 1'bx : AD[21] ;
+assign AD_in[22] = (AD_en[22] == oe_act) ? 1'bx : AD[22] ;
+assign AD_in[23] = (AD_en[23] == oe_act) ? 1'bx : AD[23] ;
+assign AD_in[24] = (AD_en[24] == oe_act) ? 1'bx : AD[24] ;
+assign AD_in[25] = (AD_en[25] == oe_act) ? 1'bx : AD[25] ;
+assign AD_in[26] = (AD_en[26] == oe_act) ? 1'bx : AD[26] ;
+assign AD_in[27] = (AD_en[27] == oe_act) ? 1'bx : AD[27] ;
+assign AD_in[28] = (AD_en[28] == oe_act) ? 1'bx : AD[28] ;
+assign AD_in[29] = (AD_en[29] == oe_act) ? 1'bx : AD[29] ;
+assign AD_in[30] = (AD_en[30] == oe_act) ? 1'bx : AD[30] ;
+assign AD_in[31] = (AD_en[31] == oe_act) ? 1'bx : AD[31] ;
 
-wire    [31:0]  AD_in = AD ;
-
-wire    [3:0]   CBE_in = CBE ;
 wire    [3:0]   CBE_out ;
 wire    [3:0]   CBE_en ;
+wire    [3:0]   CBE_in  ;
+assign CBE_in[3] = (CBE_en[3] == oe_act) ? 1'bx : CBE[3] ;
+assign CBE_in[2] = (CBE_en[2] == oe_act) ? 1'bx : CBE[2] ;
+assign CBE_in[1] = (CBE_en[1] == oe_act) ? 1'bx : CBE[1] ;
+assign CBE_in[0] = (CBE_en[0] == oe_act) ? 1'bx : CBE[0] ;
 
 `ifdef HOST
 wire            RST_in = 1'bx;
@@ -279,40 +325,40 @@ wire            RST_in = RST ;
 wire            RST_out ;
 wire            RST_en ;
 
-wire            INTA_in = INTA ;
 wire            INTA_en ;
 wire            INTA_out ;
+wire            INTA_in = (INTA_en == oe_act) ? 1'bx : INTA  ;
 
 wire            REQ_en ;
 wire            REQ_out ;
 
-wire            FRAME_in = FRAME ;
 wire            FRAME_out ;
 wire            FRAME_en ;
+wire            FRAME_in = (FRAME_en == oe_act) ? 1'bx : FRAME ;
 
-wire            IRDY_in = IRDY ;
 wire            IRDY_out ;
 wire            IRDY_en ;
+wire            IRDY_in = (IRDY_en == oe_act) ? 1'bx : IRDY ;
 
-wire            DEVSEL_in = DEVSEL ;
 wire            DEVSEL_out ;
 wire            DEVSEL_en ;
+wire            DEVSEL_in = (DEVSEL_en == oe_act) ? 1'bx : DEVSEL ;
 
-wire            TRDY_in = TRDY ;
 wire            TRDY_out ;
 wire            TRDY_en ;
+wire            TRDY_in = (TRDY_en == oe_act) ? 1'bx : TRDY ;
 
-wire            STOP_in = STOP ;
 wire            STOP_out ;
 wire            STOP_en ;
+wire            STOP_in = (STOP_en == oe_act) ? 1'bx : STOP ;
 
-wire            PAR_in = PAR ;
 wire            PAR_out ;
 wire            PAR_en ;
+wire            PAR_in = (PAR_en == oe_act) ? 1'bx : PAR ;
 
-wire            PERR_in = PERR ;
 wire            PERR_out ;
 wire            PERR_en ;
+wire            PERR_in = (PERR_en == oe_act) ? 1'bx : PERR ;
 
 wire            SERR_out ;
 wire            SERR_en ;
