@@ -39,6 +39,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.28  2004/09/23 14:04:23  mihad
+// Top now sends x's to inputs when output is enabled.
+//
 // Revision 1.27  2004/08/19 15:27:31  mihad
 // Changed minimum pci image size to 256 bytes because
 // of some PC system problems with size of IO images.
@@ -1238,7 +1241,8 @@ begin
     test_summary ;
 
     $fclose(wbu_mon_log_file_desc | pciu_mon_log_file_desc | pci_mon_log_file_desc) ;
-    $stop ;
+    // $stop ;
+   $finish;
 end
 endtask // run_tests
 
@@ -11947,7 +11951,7 @@ begin
       
         reg_value[0 ]= `PCI_AT_EN0 << 2 ;          //PCi Control         Register0
       
-       if (`PCI_AM0)
+       if (`PCI_AM0 >> 23)
        begin
         reg_value[1 ]=`PCI_BA0_MEM_IO;       //PCi Base Address    Register0 
         header_value[4] = `PCI_BA0_MEM_IO ;
@@ -11973,7 +11977,7 @@ begin
 
        reg_value[4 ]=`PCI_AT_EN1 << 2 ;          //PCi Control         Register1
 
-    if (`PCI_AM1)
+    if (`PCI_AM1 >> 23)
     begin
       reg_value[5 ]={ 31'h0,`PCI_BA1_MEM_IO}; //PCi Base Address    Register1 
       header_value[5] = `PCI_BA1_MEM_IO ;
@@ -11988,7 +11992,7 @@ begin
     
     reg_value[8 ]=`PCI_AT_EN2 << 2;          //PCi Control         Register2
     
-    if (`PCI_AM2)                        //PCi Base Address    Register2
+    if (`PCI_AM2 >> 23)                        //PCi Base Address    Register2
     begin
       reg_value[9 ]={31'h0,`PCI_BA2_MEM_IO};
       header_value[6] = `PCI_BA2_MEM_IO ;
@@ -12005,7 +12009,7 @@ begin
     
     reg_value[12]=`PCI_AT_EN3 << 2;          //PCi Control         Register3
     
-    if (`PCI_AM3)                        //PCi Base Address    Register3
+    if (`PCI_AM3 >> 23)                        //PCi Base Address    Register3
     begin
       reg_value[13]={31'h000,`PCI_BA3_MEM_IO};
       header_value[7] = `PCI_BA3_MEM_IO ;
@@ -12022,7 +12026,7 @@ begin
     
     reg_value[16]=`PCI_AT_EN4 << 2;          //PCi Control         Register4
     
-    if (`PCI_AM4)                        //PCi Base Address    Register4 
+    if (`PCI_AM4 >> 23)                        //PCi Base Address    Register4 
     begin
       reg_value[17]={31'h000,`PCI_BA4_MEM_IO};    
       header_value[8] = `PCI_BA4_MEM_IO ;
@@ -12039,7 +12043,7 @@ begin
     
     reg_value[20]=`PCI_AT_EN5 << 2;          //PCi Control         Register5 
     
-    if (`PCI_AM5)                        //PCi Base Address    Register5 
+    if (`PCI_AM5 >> 23)                        //PCi Base Address    Register5 
     begin
       reg_value[21]={31'h000,`PCI_BA5_MEM_IO};  
       header_value[9] = `PCI_BA5_MEM_IO ;
@@ -12341,7 +12345,7 @@ begin
 
     `ifdef NO_CNF_IMAGE
         `ifdef PCI_IMAGE0
-            if (`PCI_AM0)
+            if (`PCI_AM0 >> 23)
                 expected_value = `PCI_BA0_MEM_IO ;
             else
                 expected_value = 32'h0000_0000 ;
@@ -12372,7 +12376,7 @@ begin
 
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
-    if (`PCI_AM1)
+    if (`PCI_AM1 >> 23)
         expected_value = `PCI_BA1_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12398,7 +12402,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE2
-        if (`PCI_AM2)
+        if (`PCI_AM2 >> 23)
             expected_value = `PCI_BA2_MEM_IO ;
         else
             expected_value = 32'h0000_0000 ;
@@ -12427,7 +12431,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE3
-        if (`PCI_AM3)
+        if (`PCI_AM3 >> 23)
             expected_value = `PCI_BA3_MEM_IO ;
         else
             expected_value = 32'h0000_0000 ;
@@ -12456,7 +12460,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE4
-        if (`PCI_AM4)
+        if (`PCI_AM4 >> 23)
             expected_value = `PCI_BA4_MEM_IO ;
         else
             expected_value = 32'h0000_0000 ;
@@ -12485,7 +12489,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE5
-        if(`PCI_AM5)
+        if(`PCI_AM5 >> 23)
             expected_value = `PCI_BA5_MEM_IO ;
         else
             expected_value = 32'h0000_0000 ;
@@ -12720,7 +12724,7 @@ begin
         read_data                       // data returned from configuration read [31:0]
     ) ;
 
-    if (`PCI_AM1)
+    if (`PCI_AM1 >> 23)
         expected_value = `PCI_BA1_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12744,7 +12748,7 @@ begin
     ) ;
 
     `ifdef PCI_IMAGE2
-    if (`PCI_AM2)
+    if (`PCI_AM2 >> 23)
         expected_value = `PCI_BA2_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12771,7 +12775,7 @@ begin
     ) ;
 
     `ifdef PCI_IMAGE3
-    if(`PCI_AM3)
+    if(`PCI_AM3 >> 23)
         expected_value = `PCI_BA3_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12798,7 +12802,7 @@ begin
     ) ;
 
     `ifdef PCI_IMAGE4
-    if (`PCI_AM4)
+    if (`PCI_AM4 >> 23)
         expected_value = `PCI_BA4_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12825,7 +12829,7 @@ begin
     ) ;
 
     `ifdef PCI_IMAGE5
-    if(`PCI_AM5)
+    if(`PCI_AM5 >> 23)
         expected_value = `PCI_BA5_MEM_IO ;
     else
         expected_value = 32'h0000_0000 ;
@@ -12891,7 +12895,7 @@ begin
 
     expected_value = {`PCI_AM1, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
-    if (`PCI_AM1)
+    if (`PCI_AM1 >> 23)
         expected_value[0] = `PCI_BA1_MEM_IO ;
 
     configuration_cycle_read
@@ -12929,7 +12933,7 @@ begin
 `ifdef PCI_IMAGE2
     expected_value = {`PCI_AM2, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
-    if (`PCI_AM2)
+    if (`PCI_AM2 >> 23)
         expected_value[0] = `PCI_BA2_MEM_IO ;
 `else
     expected_value = 0 ;
@@ -12970,7 +12974,7 @@ begin
 `ifdef PCI_IMAGE3
     expected_value = {`PCI_AM3, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
-    if(`PCI_AM3)
+    if(`PCI_AM3 >> 23)
         expected_value[0] = `PCI_BA3_MEM_IO ;
 `else
     expected_value = 0 ;
@@ -13011,7 +13015,7 @@ begin
 `ifdef PCI_IMAGE4
     expected_value = {`PCI_AM4, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
-    if(`PCI_AM4)
+    if(`PCI_AM4 >> 23)
         expected_value[0] = `PCI_BA4_MEM_IO ;
 `else
     expected_value = 0 ;
@@ -13052,7 +13056,7 @@ begin
 `ifdef PCI_IMAGE5
     expected_value = {`PCI_AM5, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
-    if(`PCI_AM5)
+    if(`PCI_AM5 >> 23)
         expected_value[0] = `PCI_BA5_MEM_IO ;
 `else
     expected_value = 0 ;
@@ -15780,6 +15784,7 @@ task test_power_on_spoci ;
     reg [31: 0] target_address ;
     reg [31: 0] image_base     ;
     integer i ;
+    reg [31: 0] exp_data       ;
 begin
     ok = 1'b1 ;
 
@@ -16151,7 +16156,12 @@ begin
 
     config_read( {4'h1, `P_BA1_ADDR, 2'b00}, 4'hF, read_data ) ;
 
-    if (read_data !== {31'h0000_0000, `PCI_BA1_MEM_IO})
+    if (`PCI_AM1 >> 23)
+        exp_data = {31'h0000_0000, `PCI_BA1_MEM_IO} ;
+    else
+        exp_data = 32'h0 ;
+
+    if (read_data !== exp_data)
     begin
         $display("Time %t", $time) ;
         $display("Invalid value read from P_BA1 register") ;
@@ -27038,7 +27048,7 @@ begin:main
                         1, `Test_One_Zero_Master_WS, `Test_One_Zero_Target_WS,
                         `Test_Devsel_Medium, `Test_Target_Normal_Completion);
         else
-            PCIU_IO_WRITE( `Test_Master_1, pci_image_base, 32'hBEAF_DEAD, 4'h5, 1, `Test_Target_Normal_Completion) ;
+            PCIU_IO_WRITE( `Test_Master_1, pci_image_base + 'h1, 32'hBEAF_DEAD, 4'h5, 1, `Test_Target_Normal_Completion) ;
 
         do_pause(1) ;
 
@@ -27056,7 +27066,7 @@ begin:main
     begin
         for ( i = 0 ; i < `WB_RTY_CNT_MAX ; i = i + 1 )
         begin
-            wb_transaction_progress_monitor( pci_image_base, 1'b1, 0, 1'b1, ok_wb ) ;
+            wb_transaction_progress_monitor( pci_image_base + !test_mem, 1'b1, 0, 1'b1, ok_wb ) ;
             if ( ok_wb !== 1 )
             begin
                 $display("WISHBONE Master Retry Counter expiration test failed! WB transaction progress monitor detected invalid transaction or none at all on WB bus! Time %t", $time) ;
@@ -27132,7 +27142,7 @@ begin:main
     
     test_name = "ERROR ADDRESS REGISTER VALUE CHECK AFTER RETRY COUNTER EXPIRED" ;
     config_read( pci_err_cs_offset + 4, 4'hF, temp_val1 ) ;
-    if ( temp_val1 !== pci_image_base )
+    if ( temp_val1 !== (pci_image_base + !test_mem))
     begin
         $display("WISHBONE Master Retry Counter expiration test failed! Invalid value in error address register when retry counter expired during a write! Time %t", $time) ;
         test_fail("value in error address register was wrong when retry counter expired during posted write through PCI Target unit") ;
@@ -27263,7 +27273,7 @@ begin:main
                         1, `Test_One_Zero_Master_WS, `Test_One_Zero_Target_WS,
                         `Test_Devsel_Medium, `Test_Target_Normal_Completion);
         else
-            PCIU_IO_WRITE( `Test_Master_1, pci_image_base, 32'hDEAD_BEAF, 4'h0, 1, `Test_Target_Normal_Completion) ;
+            PCIU_IO_WRITE( `Test_Master_1, pci_image_base, 32'hDEAD_BEAF, 4'hA, 1, `Test_Target_Normal_Completion) ;
  
         do_pause(1) ;
  
