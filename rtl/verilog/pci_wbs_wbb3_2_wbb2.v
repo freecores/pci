@@ -40,6 +40,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.3  2003/12/19 11:11:30  mihad
 // Compact PCI Hot Swap support added.
 // New testcases added.
@@ -269,7 +272,7 @@ begin
 end
 
 assign wbs_stb_o = (wbs_cyc_o & ~wbs_we_o & ~wbs_ack_o & ~wbs_err_o & ~wbs_rty_o) |
-                   (wbs_cyc_o & wbs_stb_i & wbs_cab_o & ~wbs_we_o & wbs_cti_i !== 3'b111) |
+                   (wbs_cyc_o & wbs_stb_i & wbs_cab_o & ~wbs_we_o & wbs_cti_i != 3'b111) |
                    (wbs_cyc_o & wbs_we_o & wbs_dat_i_o_valid) ;
 
 endmodule
