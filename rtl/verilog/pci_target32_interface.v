@@ -42,6 +42,12 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.10  2003/12/19 11:11:30  mihad
+// Compact PCI Hot Swap support added.
+// New testcases added.
+// Specification updated.
+// Test application changed to support WB B3 cycles.
+//
 // Revision 1.9  2003/08/21 20:55:14  tadejm
 // Corrected bug when writing to FIFO (now it is registered).
 //
@@ -202,6 +208,20 @@ module pci_target32_interface
 	addr_tran_en5_in
 ) ;
 
+`ifdef HOST
+    `ifdef NO_CNF_IMAGE
+        parameter pci_ba0_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
+    `else
+        parameter pci_ba0_width = 20    ;
+    `endif
+`endif
+
+`ifdef GUEST
+    parameter pci_ba0_width = 20 ;
+`endif
+
+parameter pci_ba1_5_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
+
 /*==================================================================================================================
 System inputs.
 ==================================================================================================================*/
@@ -338,24 +358,24 @@ input			pre_fetch_en4_in ;	// bit-1 in pci_image_ctr4 register
 input			pre_fetch_en5_in ;	// bit-1 in pci_image_ctr5 register
 
 // Input from image registers - register values needed for decoder to work properly
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr0_in ;	// base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr1_in ; // base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr2_in ; // base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr3_in ; // base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr4_in ; // base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_base_addr5_in ; // base address from base address register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask0_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask1_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask2_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask3_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask4_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_addr_mask5_in ; // masking of base address from address mask register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr0_in ; // translation address from address translation register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr1_in ; // translation address from address translation register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr2_in ; // translation address from address translation register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr3_in ; // translation address from address translation register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr4_in ; // translation address from address translation register
-input	[31:(32-`PCI_NUM_OF_DEC_ADDR_LINES)]	pci_tran_addr5_in ; // translation address from address translation register
+input	[pci_ba0_width   - 1:0]	pci_base_addr0_in ;	// base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_base_addr1_in ; // base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_base_addr2_in ; // base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_base_addr3_in ; // base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_base_addr4_in ; // base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_base_addr5_in ; // base address from base address register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask0_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask1_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask2_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask3_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask4_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_addr_mask5_in ; // masking of base address from address mask register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr0_in ; // translation address from address translation register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr1_in ; // translation address from address translation register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr2_in ; // translation address from address translation register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr3_in ; // translation address from address translation register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr4_in ; // translation address from address translation register
+input	[pci_ba1_5_width - 1:0]	pci_tran_addr5_in ; // translation address from address translation register
 
 input			addr_tran_en0_in ;	// address translation enable bit
 input			addr_tran_en1_in ;	// address translation enable bit
@@ -444,7 +464,7 @@ wire			pre_fetch_en5 = 1'b0 ;
 `ifdef			HOST
 	`ifdef		NO_CNF_IMAGE
 		`ifdef	PCI_IMAGE0	// if PCI bridge is HOST and IMAGE0 is assigned as general image space
-	pci_pci_decoder   #(`PCI_NUM_OF_DEC_ADDR_LINES) decoder0
+	pci_pci_decoder   #(pci_ba0_width) decoder0
 				   (.hit			(hit0_in),
 					.addr_out		(address0_in),
 					.addr_in		(address_in),
@@ -459,33 +479,33 @@ wire			pre_fetch_en5 = 1'b0 ;
 					) ;
 		`endif
 	`else
-	pci_pci_decoder   #(`PCI_NUM_OF_DEC_ADDR_LINES) decoder0
+	pci_pci_decoder   #(pci_ba0_width) decoder0
 				   (.hit			(hit0_in),
 					.addr_out		(address0_in),
 					.addr_in		(address_in),
 					.bc_in			(bc_in),
 					.base_addr		(pci_base_addr0_in),
-					.mask_addr		(pci_addr_mask0_in),
-					.tran_addr		(pci_tran_addr0_in),
-					.at_en			(addr_tran_en0_in),
-					.mem_io_space	(mem_io_addr_space0_in),
+					.mask_addr		({pci_ba0_width{1'b1}}),
+					.tran_addr		({pci_ba0_width{1'b0}}),
+					.at_en			(1'b0),
+					.mem_io_space	(1'b0),
 					.mem_en			(mem_enable_in),
-					.io_en			(io_enable_in)
+					.io_en			(1'b0)
 					) ;
 	`endif
 `else // GUEST
-	pci_pci_decoder   #(`PCI_NUM_OF_DEC_ADDR_LINES) decoder0
+	pci_pci_decoder   #(pci_ba0_width) decoder0
 				   (.hit			(hit0_in),
 					.addr_out		(address0_in),
 					.addr_in		(address_in),
 					.bc_in			(bc_in),
 					.base_addr		(pci_base_addr0_in),
-					.mask_addr		(pci_addr_mask0_in),
-					.tran_addr		(pci_tran_addr0_in),
-					.at_en			(addr_tran_en0_in),
-					.mem_io_space	(mem_io_addr_space0_in),
+					.mask_addr		({pci_ba0_width{1'b1}}),
+					.tran_addr		({pci_ba0_width{1'b0}}),
+					.at_en			(1'b0),
+					.mem_io_space	(1'b0),
 					.mem_en			(mem_enable_in),
-					.io_en			(io_enable_in)
+					.io_en			(1'b0)
 					) ;
 `endif
 	pci_pci_decoder   #(`PCI_NUM_OF_DEC_ADDR_LINES) decoder1

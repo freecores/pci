@@ -62,6 +62,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2003/10/17 09:11:52  markom
+// mbist signals updated according to newest convention
+//
 // Revision 1.2  2003/08/14 13:06:03  simons
 // synchronizer_flop replaced with pci_synchronizer_flop, artisan ram instance updated.
 //
@@ -404,32 +407,27 @@ input [`PCI_MBIST_CTRL_WIDTH - 1:0] mbist_ctrl_i;       // bist chain shift cont
     // Generic RAM's registers and wires
     //
     reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
-    reg	[dw-1:0]	do_reg_a;		// RAM data output register
     reg	[dw-1:0]	do_reg_b;		// RAM data output register
 
     //
     // Data output drivers
     //
-    assign do_a = (oe_a) ? do_reg_a : {dw{1'bz}};
-    assign do_b = (oe_b) ? do_reg_b : {dw{1'bz}};
+    assign do_a = {dw{1'b0}} ;
+    assign do_b = do_reg_b   ;
 
     //
     // RAM read and write
     //
     always @(posedge clk_a)
-    	if (ce_a && !we_a)
-    		do_reg_a <= #1 mem[addr_a];
-    	else if (ce_a && we_a)
+    	if (ce_a && we_a)
     		mem[addr_a] <= #1 di_a;
 
     //
     // RAM read and write
     //
     always @(posedge clk_b)
-    	if (ce_b && !we_b)
+    	if (ce_b)
     		do_reg_b <= #1 mem[addr_b];
-    	else if (ce_b && we_b)
-    		mem[addr_b] <= #1 di_b;
 `endif
 
 // synopsys translate_off
@@ -459,3 +457,4 @@ end
 // synopsys translate_on
 
 endmodule
+

@@ -43,6 +43,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.17  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.16  2003/12/19 11:11:30  mihad
 // Compact PCI Hot Swap support added.
 // New testcases added.
@@ -244,6 +247,20 @@ module pci_bridge32
 `endif
 
 );
+
+`ifdef HOST
+    `ifdef NO_CNF_IMAGE
+        parameter pci_ba0_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
+    `else
+        parameter pci_ba0_width = 20    ;
+    `endif
+`endif
+
+`ifdef GUEST
+    parameter pci_ba0_width = 20 ;
+`endif
+
+parameter pci_ba1_5_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
 
 // WISHBONE system signals
 input   wb_clk_i ;
@@ -501,24 +518,24 @@ wire    [7:0]   conf_cache_line_size_to_wb_out ;
 wire            conf_cache_lsize_not_zero_to_wb_out ;
 wire    [7:0]   conf_latency_tim_out ;
 
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba0_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba1_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba2_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba3_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba4_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ba5_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta0_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta1_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta2_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta3_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta4_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_ta5_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am0_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am1_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am2_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am3_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am4_out ;
-wire   [19:(20 - `PCI_NUM_OF_DEC_ADDR_LINES)]   conf_pci_am5_out ;
+wire    [pci_ba0_width   - 1:0]   conf_pci_ba0_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ba1_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ba2_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ba3_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ba4_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ba5_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta0_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta1_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta2_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta3_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta4_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_ta5_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am0_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am1_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am2_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am3_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am4_out ;
+wire    [pci_ba1_5_width - 1:0]   conf_pci_am5_out ;
 
 wire            conf_pci_mem_io0_out ;
 wire            conf_pci_mem_io1_out ;
@@ -1031,24 +1048,24 @@ wire            pciu_wbu_frame_en_in            =   out_bckp_frame_en_out ;
 `endif
 `endif
 
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar0_in =   conf_pci_ba0_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar1_in =   conf_pci_ba1_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar2_in =   conf_pci_ba2_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar3_in =   conf_pci_ba3_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar4_in =   conf_pci_ba4_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar5_in =   conf_pci_ba5_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am0_in  =   conf_pci_am0_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am1_in  =   conf_pci_am1_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am2_in  =   conf_pci_am2_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am3_in  =   conf_pci_am3_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am4_in  =   conf_pci_am4_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am5_in  =   conf_pci_am5_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta0_in  =   conf_pci_ta0_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta1_in  =   conf_pci_ta1_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta2_in  =   conf_pci_ta2_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta3_in  =   conf_pci_ta3_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta4_in  =   conf_pci_ta4_out ;
-wire   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta5_in  =   conf_pci_ta5_out ;
+wire    [pci_ba0_width   - 1:0] pciu_bar0_in =   conf_pci_ba0_out    ;
+wire    [pci_ba1_5_width - 1:0] pciu_bar1_in =   conf_pci_ba1_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_bar2_in =   conf_pci_ba2_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_bar3_in =   conf_pci_ba3_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_bar4_in =   conf_pci_ba4_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_bar5_in =   conf_pci_ba5_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am0_in  =   conf_pci_am0_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am1_in  =   conf_pci_am1_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am2_in  =   conf_pci_am2_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am3_in  =   conf_pci_am3_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am4_in  =   conf_pci_am4_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_am5_in  =   conf_pci_am5_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta0_in  =   conf_pci_ta0_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta1_in  =   conf_pci_ta1_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta2_in  =   conf_pci_ta2_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta3_in  =   conf_pci_ta3_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta4_in  =   conf_pci_ta4_out ;
+wire    [pci_ba1_5_width - 1:0] pciu_ta5_in  =   conf_pci_ta5_out ;
 
 wire    [7:0]   pciu_cache_line_size_in                 =   conf_cache_line_size_to_wb_out ;
 wire            pciu_cache_lsize_not_zero_in            =   conf_cache_lsize_not_zero_to_wb_out ;

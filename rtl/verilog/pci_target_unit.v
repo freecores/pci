@@ -42,6 +42,12 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.15  2003/12/19 11:11:30  mihad
+// Compact PCI Hot Swap support added.
+// New testcases added.
+// Specification updated.
+// Test application changed to support WB B3 cycles.
+//
 // Revision 1.14  2003/10/17 09:11:52  markom
 // mbist signals updated according to newest convention
 //
@@ -192,6 +198,20 @@ module pci_target_unit
 `endif
 );
 
+`ifdef HOST
+    `ifdef NO_CNF_IMAGE
+        parameter pci_ba0_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
+    `else
+        parameter pci_ba0_width = 20    ;
+    `endif
+`endif
+
+`ifdef GUEST
+    parameter pci_ba0_width = 20 ;
+`endif
+
+parameter pci_ba1_5_width = `PCI_NUM_OF_DEC_ADDR_LINES ;
+
 input reset_in,
       wb_clock_in,
       pci_clock_in ;
@@ -219,25 +239,25 @@ input   [5:0]   pciu_map_in ;
 input   [5:0]   pciu_pref_en_in ;
 input   [31:0]  pciu_conf_data_in ;
 
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar0_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar1_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar2_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar3_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar4_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_bar5_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am0_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am1_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am2_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am3_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am4_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_am5_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta0_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta1_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta2_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta3_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta4_in ;
-input   [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pciu_ta5_in ;
-input   [5:0]                               pciu_at_en_in ;
+input   [pci_ba0_width   - 1:0] pciu_bar0_in ;
+input   [pci_ba1_5_width - 1:0] pciu_bar1_in ;
+input   [pci_ba1_5_width - 1:0] pciu_bar2_in ;
+input   [pci_ba1_5_width - 1:0] pciu_bar3_in ;
+input   [pci_ba1_5_width - 1:0] pciu_bar4_in ;
+input   [pci_ba1_5_width - 1:0] pciu_bar5_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am0_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am1_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am2_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am3_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am4_in ;
+input   [pci_ba1_5_width - 1:0] pciu_am5_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta0_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta1_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta2_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta3_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta4_in ;
+input   [pci_ba1_5_width - 1:0] pciu_ta5_in ;
+input   [5:0]                   pciu_at_en_in ;
 
 input   [7:0]   pciu_cache_line_size_in ;
 input           pciu_cache_lsize_not_zero_in ;
@@ -682,24 +702,24 @@ wire        pcit_if_pre_fetch_en2_in                =   pciu_pref_en_in[2] ;
 wire        pcit_if_pre_fetch_en3_in                =   pciu_pref_en_in[3] ;
 wire        pcit_if_pre_fetch_en4_in                =   pciu_pref_en_in[4] ;
 wire        pcit_if_pre_fetch_en5_in                =   pciu_pref_en_in[5] ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr0_in =   pciu_bar0_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr1_in =   pciu_bar1_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr2_in =   pciu_bar2_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr3_in =   pciu_bar3_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr4_in =   pciu_bar4_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_base_addr5_in =   pciu_bar5_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask0_in =   pciu_am0_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask1_in =   pciu_am1_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask2_in =   pciu_am2_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask3_in =   pciu_am3_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask4_in =   pciu_am4_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_addr_mask5_in =   pciu_am5_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr0_in =   pciu_ta0_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr1_in =   pciu_ta1_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr2_in =   pciu_ta2_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr3_in =   pciu_ta3_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr4_in =   pciu_ta4_in ;
-wire [(`PCI_NUM_OF_DEC_ADDR_LINES - 1):0] pcit_if_pci_tran_addr5_in =   pciu_ta5_in ;
+wire [(pci_ba0_width   - 1):0] pcit_if_pci_base_addr0_in =   pciu_bar0_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_base_addr1_in =   pciu_bar1_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_base_addr2_in =   pciu_bar2_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_base_addr3_in =   pciu_bar3_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_base_addr4_in =   pciu_bar4_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_base_addr5_in =   pciu_bar5_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask0_in =   pciu_am0_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask1_in =   pciu_am1_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask2_in =   pciu_am2_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask3_in =   pciu_am3_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask4_in =   pciu_am4_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_addr_mask5_in =   pciu_am5_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr0_in =   pciu_ta0_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr1_in =   pciu_ta1_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr2_in =   pciu_ta2_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr3_in =   pciu_ta3_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr4_in =   pciu_ta4_in ;
+wire [(pci_ba1_5_width - 1):0] pcit_if_pci_tran_addr5_in =   pciu_ta5_in ;
 wire        pcit_if_addr_tran_en0_in                =   pciu_at_en_in[0] ;
 wire        pcit_if_addr_tran_en1_in                =   pciu_at_en_in[1] ;
 wire        pcit_if_addr_tran_en2_in                =   pciu_at_en_in[2] ;

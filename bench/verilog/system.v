@@ -39,6 +39,10 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.26  2004/07/07 12:45:02  mihad
+// Added SubsystemVendorID, SubsystemID, MAXLatency, MinGnt defines.
+// Enabled value loading from serial EEPROM for all of the above + VendorID and DeviceID registers.
+//
 // Revision 1.25  2004/03/19 16:36:26  mihad
 // Single PCI Master write fix.
 //
@@ -771,17 +775,6 @@ end
 
 reg [31:0] wmem_data [0:1023] ; // data for memory mapped image writes
 reg [31:0] wio_data  [0:1023] ; // data for IO mapped image writes
-
-// basic configuration parameters for both behavioral devices
-parameter [2:0] Master_ID_A                           = `Test_Master_1;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Config_Addr_A = `TAR2_IDSEL_ADDR;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Base_Addr_A0  = `BEH_TAR2_MEM_START;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Base_Addr_A1  = `BEH_TAR2_IO_START;
-
-parameter [2:0] Master_ID_B                           = `Test_Master_2;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Config_Addr_B = `TAR1_IDSEL_ADDR;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Base_Addr_B0  = `BEH_TAR1_MEM_START;
-parameter [PCI_BUS_DATA_RANGE:0] Target_Base_Addr_B1  = `BEH_TAR1_IO_START;
 
 // basic configuration parameters for REAL device
 reg [PCI_BUS_DATA_RANGE:0] Target_Config_Addr_R ;
@@ -9663,8 +9656,10 @@ begin:main
             begin
                 test_fail("WB transaction monitor detected invalid transaction or none at all on WB bus") ;
             end
-            if (wishbone_slave.wb_memory[0] !== 32'hF0F0_F0F0)
+            if (wishbone_slave.wb_memory[pci_image_base[21:2]] !== 32'hF0F0_F0F0)
             begin
+                $display("Time %t - wrong data value written by WB Master", $time) ;
+                $display("Expected 0x%h, Actual 0x%h", 32'hF0F0_F0F0, wishbone_slave.wb_memory[pci_image_base[21:2]]) ;
                 test_fail("Invalid data written on WB bus") ;
             end
         end
@@ -11905,24 +11900,22 @@ begin
         header_value[4] = `PCI_BA0_MEM_IO ;
        end
 
-       tmp_reg_val={`PCI_AM0, 12'h000} ;
+       tmp_reg_val={`PCI_AM0, 8'h00} ;
        tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
        reg_value[2 ]=tmp_reg_val;   //PCi Address Mask    Register0
-       tmp_reg_val = {`PCI_TA0, 12'h000} ;
+       tmp_reg_val = {`PCI_TA0, 8'h00} ;
        tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
        reg_value[3 ]=tmp_reg_val;   //PCi Translation Adr.Register0
      `endif
 	`else
-      reg_value[2 ]=32'hffff_ffff ;   //PCi Address Mask    Register0
-      reg_value[2 ]=reg_value[2 ] << (32 - `PCI_NUM_OF_DEC_ADDR_LINES) ;
+      reg_value[2 ]=32'hffff_f000 ;   //PCi Address Mask    Register0
 
     `endif //NO_CNF_IMAGE
     `else
       tmp_reg_val=Target_Base_Addr_R[0] ;
-      tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
+      tmp_reg_val[11:0] = 'h0 ;
       reg_value[1 ]=tmp_reg_val ;
-      reg_value[2 ]=32'hffff_ffff ;   //PCi Address Mask    Register0
-      reg_value[2 ]=reg_value[2 ] << (32 - `PCI_NUM_OF_DEC_ADDR_LINES) ;
+      reg_value[2 ]=32'hffff_f000 ;   //PCi Address Mask    Register0
    `endif //host
 
        reg_value[4 ]=`PCI_AT_EN1 << 2 ;          //PCi Control         Register1
@@ -11932,10 +11925,10 @@ begin
       reg_value[5 ]={ 31'h0,`PCI_BA1_MEM_IO}; //PCi Base Address    Register1 
       header_value[5] = `PCI_BA1_MEM_IO ;
     end
-    tmp_reg_val={`PCI_AM1, 12'h000} ;
+    tmp_reg_val={`PCI_AM1, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[6 ]=tmp_reg_val;   //PCi Address Mask    Register0
-    tmp_reg_val = {`PCI_TA1, 12'h000} ;
+    tmp_reg_val = {`PCI_TA1, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[7 ]=tmp_reg_val;   //PCi Translation Adr.Register0
    `ifdef PCI_IMAGE2
@@ -11947,10 +11940,10 @@ begin
       reg_value[9 ]={31'h0,`PCI_BA2_MEM_IO};
       header_value[6] = `PCI_BA2_MEM_IO ;
     end
-    tmp_reg_val={`PCI_AM2, 12'h000} ;
+    tmp_reg_val={`PCI_AM2, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[10 ]=tmp_reg_val;   //PCi Address Mask    Register0
-    tmp_reg_val = {`PCI_TA2, 12'h000} ;
+    tmp_reg_val = {`PCI_TA2, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[11 ]=tmp_reg_val;   //PCi Translation Adr.Register0
     `endif
@@ -11964,10 +11957,10 @@ begin
       reg_value[13]={31'h000,`PCI_BA3_MEM_IO};
       header_value[7] = `PCI_BA3_MEM_IO ;
     end
-    tmp_reg_val={`PCI_AM3, 12'h000} ;
+    tmp_reg_val={`PCI_AM3, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[14 ]=tmp_reg_val;   //PCi Address Mask    Register0
-    tmp_reg_val = {`PCI_TA3, 12'h000} ;
+    tmp_reg_val = {`PCI_TA3, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[15 ]=tmp_reg_val;   //PCi Translation Adr.Register0
     `endif
@@ -11981,10 +11974,10 @@ begin
       reg_value[17]={31'h000,`PCI_BA4_MEM_IO};    
       header_value[8] = `PCI_BA4_MEM_IO ;
     end
-    tmp_reg_val={`PCI_AM4, 12'h000} ;
+    tmp_reg_val={`PCI_AM4, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[18 ]=tmp_reg_val;   //PCi Address Mask    Register0
-    tmp_reg_val = {`PCI_TA4, 12'h000} ;
+    tmp_reg_val = {`PCI_TA4, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[19 ]=tmp_reg_val;   //PCi Translation Adr.Register0
     `endif
@@ -11999,10 +11992,10 @@ begin
       header_value[9] = `PCI_BA5_MEM_IO ;
     end
 
-    tmp_reg_val={`PCI_AM5, 12'h000} ;
+    tmp_reg_val={`PCI_AM5, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[22 ]=tmp_reg_val;   //PCi Address Mask    Register0
-    tmp_reg_val = {`PCI_TA5, 12'h000} ;
+    tmp_reg_val = {`PCI_TA5, 8'h00} ;
     tmp_reg_val[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
     reg_value[23 ]=tmp_reg_val;   //PCi Translation Adr.Register0
     `endif
@@ -12470,7 +12463,7 @@ begin
 
     `ifdef NO_CNF_IMAGE
         `ifdef PCI_IMAGE0
-            expected_value = {`PCI_AM0, 12'h000};
+            expected_value = {`PCI_AM0, 8'h00};
 
             expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
         `else
@@ -12502,7 +12495,7 @@ begin
 
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
-    expected_value = {`PCI_AM1, 12'h000};
+    expected_value = {`PCI_AM1, 8'h00};
 
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
 
@@ -12527,7 +12520,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE2
-        expected_value = {`PCI_AM2, 12'h000};
+        expected_value = {`PCI_AM2, 8'h00};
 
         expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     `else
@@ -12555,7 +12548,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE3
-        expected_value = {`PCI_AM3, 12'h000};
+        expected_value = {`PCI_AM3, 8'h00};
 
         expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     `else
@@ -12583,7 +12576,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE4
-        expected_value = {`PCI_AM4, 12'h000};
+        expected_value = {`PCI_AM4, 8'h00};
 
         expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     `else
@@ -12611,7 +12604,7 @@ begin
     wishbone_master.wb_single_read(read_data, flags, read_status) ;
 
     `ifdef PCI_IMAGE5
-        expected_value = {`PCI_AM5, 12'h000};
+        expected_value = {`PCI_AM5, 8'h00};
 
         expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     `else
@@ -12843,7 +12836,7 @@ begin
         read_data                       // data to write [31:0]
     ) ;
 
-    expected_value = {`PCI_AM1, 12'h000} ;
+    expected_value = {`PCI_AM1, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     if (`PCI_AM1)
         expected_value[0] = `PCI_BA1_MEM_IO ;
@@ -12881,7 +12874,7 @@ begin
     ) ;
 
 `ifdef PCI_IMAGE2
-    expected_value = {`PCI_AM2, 12'h000} ;
+    expected_value = {`PCI_AM2, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     if (`PCI_AM2)
         expected_value[0] = `PCI_BA2_MEM_IO ;
@@ -12922,7 +12915,7 @@ begin
     ) ;
 
 `ifdef PCI_IMAGE3
-    expected_value = {`PCI_AM3, 12'h000} ;
+    expected_value = {`PCI_AM3, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     if(`PCI_AM3)
         expected_value[0] = `PCI_BA3_MEM_IO ;
@@ -12963,7 +12956,7 @@ begin
     ) ;
 
 `ifdef PCI_IMAGE4
-    expected_value = {`PCI_AM4, 12'h000} ;
+    expected_value = {`PCI_AM4, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     if(`PCI_AM4)
         expected_value[0] = `PCI_BA4_MEM_IO ;
@@ -13004,7 +12997,7 @@ begin
     ) ;
 
 `ifdef PCI_IMAGE5
-    expected_value = {`PCI_AM5, 12'h000} ;
+    expected_value = {`PCI_AM5, 8'h00} ;
     expected_value[(31-`PCI_NUM_OF_DEC_ADDR_LINES):0] = 0 ;
     if(`PCI_AM5)
         expected_value[0] = `PCI_BA5_MEM_IO ;
@@ -16340,7 +16333,7 @@ begin
 
     config_read( {4'h1, `P_BA0_ADDR, 2'b00}, 4'hF, read_data ) ;
 
-    if (read_data !== (Target_Base_Addr_R[0] & {{`PCI_NUM_OF_DEC_ADDR_LINES{1'b1}}, {(32 - `PCI_NUM_OF_DEC_ADDR_LINES){1'b0}}} ) )
+    if (read_data !== (Target_Base_Addr_R[0] & 32'hFFFF_F000) )
     begin
         $display("Time %t", $time) ;
         $display("Read from PCI BAR0 register returned unexpected data value") ;
@@ -19447,7 +19440,7 @@ begin
 
         // device status register
         exp_dat = Target_Base_Addr_R[0] ;
-        exp_dat[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 'h0 ;
+        exp_dat[11:0] = 'h0 ;
 
         if (read_dat !== exp_dat)
         begin
@@ -21458,7 +21451,7 @@ begin:main
         begin
             rnd_seed = 32'h0f1e_2d3c ;
 
-            for (clocks_between_transfers = 128 ; clocks_between_transfers > 0 ; clocks_between_transfers = clocks_between_transfers - 1)
+            for (clocks_between_transfers = 63 ; clocks_between_transfers > 0 ; clocks_between_transfers = clocks_between_transfers - 1)
             begin
                 do_retry = 1'b1 ;
                 cur_wdata = $random(rnd_seed) ;
@@ -21497,7 +21490,7 @@ begin:main
             integer cur_adr ;
             reg no_error ;
 
-            for (cur_adr = 128 * 4 ; (cur_adr > 0) & ok ; cur_adr = cur_adr - 4)
+            for (cur_adr = 63 * 4 ; (cur_adr > 0) & ok ; cur_adr = cur_adr - 4)
             begin
                 wb_transaction_progress_monitor
                 ( 
@@ -21521,7 +21514,7 @@ begin:main
 
         rnd_seed = 32'h0f1e_2d3c ;
 
-        for (clocks_between_transfers = 128 ; clocks_between_transfers > 0 ; clocks_between_transfers = clocks_between_transfers - 1)
+        for (clocks_between_transfers = 63 ; clocks_between_transfers > 0 ; clocks_between_transfers = clocks_between_transfers - 1)
         begin
             do_retry = 1'b1 ;
             cur_wdata = $random(rnd_seed) ;
@@ -21543,8 +21536,8 @@ begin:main
                     if (termination !== ipci_unsupported_commands_master.retry)
                     begin
                         $display("Time %t", $time) ;
-                        $display("Unexpected termination was received while writing through PCI Target Unit") ;
-                        test_fail("Unexpected termination was received while writing through PCI Target Unit") ;
+                        $display("Unexpected termination was received while reading through PCI Target Unit") ;
+                        test_fail("Unexpected termination was received while reading through PCI Target Unit") ;
                         do_retry = 1'b0 ;
                         ok = 1'b0 ;
                     end
@@ -28514,6 +28507,8 @@ task test_target_overload ;
     integer current_size ;
     reg [31:0] current_pci_address ;
     reg [31:0] expected_data ;
+    reg [31:0] actual_data ;
+    integer index ;
 begin:main
     
     `ifdef HOST
@@ -28559,7 +28554,7 @@ begin:main
     (
         test_image_num,                     // image number
         Target_Base_Addr_R[test_image_num], // base address
-        Target_Addr_Mask_R[test_image_num], // address mask
+        32'hFFFF_F000                     , // address mask - 4KB or more
         Target_Tran_Addr_R[test_image_num], // translation address
         1'b0,                               // io/mem mapping select
         1'b0,                               // prefetch enable
@@ -28596,16 +28591,24 @@ begin:main
         pci_transaction_num = 0 ;
         wb_transaction_num = 0 ;
 
-        current_wb_address = pci_to_wb_addr_convert
-                             (
-                               Target_Base_Addr_R[test_image_num], // pci address
-                               Target_Tran_Addr_R[test_image_num], // translation address
-                               addr_translated
-                              );
+        if (addr_translated)
+            current_wb_address = Target_Tran_Addr_R[test_image_num] ;
+        else
+            current_wb_address = Target_Base_Addr_R[test_image_num] ;
 
-        current_wb_address  = current_wb_address & Target_Addr_Mask_R[test_image_num] ;
+        current_wb_address[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 0 ;
+        current_wb_address[11:0] = 0 ;
+
+        current_wb_address  = current_wb_address ;
         current_wb_address  = current_wb_address + (('d1024 - current_size) * 4) ;
-        current_pci_address = (Target_Base_Addr_R[test_image_num] & Target_Addr_Mask_R[test_image_num]) + (('d1024 - current_size) * 4) ;
+
+        current_pci_address = Target_Base_Addr_R[test_image_num] ;
+
+        current_pci_address[31 - `PCI_NUM_OF_DEC_ADDR_LINES:0] = 0 ;
+        current_pci_address[11:0] = 0 ;
+        current_pci_address = current_pci_address + (('d1024 - current_size) * 4) ;
+
+        expected_data = ~current_pci_address ;
 
         fork
         begin
@@ -28647,47 +28650,35 @@ begin:main
             while (((total_transfers < current_size) || (pci_transaction_num > wb_transaction_num)) && ok_pci && ok_wb && ok)
             begin
                 wait(pci_transaction_num > wb_transaction_num) ;
-                fork
+                wb_transaction_progress_monitor
+                (
+                    current_wb_address,                     //address
+                    1'b1,                                   //write/read
+                    transaction_sizes[wb_transaction_num],  //num_of_transfers
+                    1'b1,                                   //check_transfers
+                    ok_wb                                   // success/fail
+                );
+
+                // check the received data
+                for (index = 0 ; index < transaction_sizes[wb_transaction_num] ; index = index + 1)
                 begin
-                    wb_transaction_progress_monitor
-                    (
-                        current_wb_address,                     //address
-                        1'b1,                                   //write/read
-                        transaction_sizes[wb_transaction_num],  //num_of_transfers
-                        1'b1,                                   //check_transfers
-                        ok_wb                                   // success/fail
-                    );
-                    current_wb_address = current_wb_address + (transaction_sizes[wb_transaction_num] * 4) ;
-                    wb_transaction_num = wb_transaction_num + 1'b1 ;
-                    if (ok_wb !== 1'b1)
+                    actual_data = wishbone_slave.wb_memory[index + current_wb_address[21:2]] ;
+                    if (actual_data !== expected_data)
                     begin
-                        test_fail("WB Transaction progress monitor detected invalid transaction or none at all on WB bus");
+                        $display("Time %t. Wrong data from WB_MASTER detected! Expected %h, Actual %h", $time, expected_data, actual_data) ;
+                        test_fail("Wrong WB MASTER output data detected") ;
                     end
+                    expected_data = ~expected_data ;
+                    expected_data = expected_data + 4 ;
+                    expected_data = ~expected_data ;
                 end
+
+                current_wb_address = current_wb_address + (transaction_sizes[wb_transaction_num] * 4) ;
+                wb_transaction_num = wb_transaction_num + 1'b1 ;
+                if (ok_wb !== 1'b1)
                 begin
-                    @(posedge wb_clock) ;
-                    while (CYC_O !== 1'b1)
-                        @(posedge wb_clock) ;
-
-                    while (CYC_O === 1'b1)
-                    begin
-                        if (STB_O === 1'b1)
-                        begin
-
-                            expected_data = Target_Base_Addr_R[test_image_num] & Target_Addr_Mask_R[test_image_num] ;
-                            expected_data = expected_data | (ADR_O & ~Target_Addr_Mask_R[test_image_num]) ;
-                            expected_data = ~expected_data ;
-
-                            if (MDAT_O !== expected_data)
-                            begin
-                                $display("Time %t. Wrong data from WB_MASTER detected! Expected %h, Actual %h", $time, expected_data, MDAT_O) ;
-                                test_fail("Wrong WB MASTER output data detected") ;
-                            end
-                        end
-                        @(posedge wb_clock) ;
-                    end
+                    test_fail("WB Transaction progress monitor detected invalid transaction or none at all on WB bus");
                 end
-                join
             end
 
 //            wb_transaction_num = wb_transaction_num - 1'b1 ;

@@ -39,6 +39,10 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2004/07/07 12:45:02  mihad
+// Added SubsystemVendorID, SubsystemID, MAXLatency, MinGnt defines.
+// Enabled value loading from serial EEPROM for all of the above + VendorID and DeviceID registers.
+//
 // Revision 1.6  2004/01/24 11:54:16  mihad
 // Update! SPOCI Implemented!
 //
@@ -140,8 +144,9 @@
     `define PCIR_ADDR_LENGTH 3
     
     `define WB_RAM_DONT_SHARE
+    `define PCI_RAM_DONT_SHARE
         
-    `define PCI_FIFO_RAM_ADDR_LENGTH 5      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
+    `define PCI_FIFO_RAM_ADDR_LENGTH 4      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
     `define WB_FIFO_RAM_ADDR_LENGTH 4       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
 
 `endif
@@ -153,19 +158,24 @@
     `define PCIR_ADDR_LENGTH 8
     
     `define PCI_RAM_DONT_SHARE
+    `define WB_RAM_DONT_SHARE
     
     `define PCI_FIFO_RAM_ADDR_LENGTH 8      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
-    `define WB_FIFO_RAM_ADDR_LENGTH 8       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
+    `define WB_FIFO_RAM_ADDR_LENGTH 7       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
 `endif
 
 `ifdef REGR_FIFO_LARGE_GENERIC // without any parameters only (generic)
-        `define WBW_ADDR_LENGTH 9
-        `define WBR_ADDR_LENGTH 9
-        `define PCIW_ADDR_LENGTH 9
-        `define PCIR_ADDR_LENGTH 9
-        
-        `define PCI_FIFO_RAM_ADDR_LENGTH 10      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
-        `define WB_FIFO_RAM_ADDR_LENGTH 10       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
+    `define WBW_ADDR_LENGTH 9
+    `define WBR_ADDR_LENGTH 9
+    `define PCIW_ADDR_LENGTH 9
+    `define PCIR_ADDR_LENGTH 9
+    
+    `define PCI_FIFO_RAM_ADDR_LENGTH 9      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
+    `define WB_FIFO_RAM_ADDR_LENGTH 9       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
+
+    `define PCI_RAM_DONT_SHARE
+    `define WB_RAM_DONT_SHARE
+
 `endif
     
     // number defined here specifies how many MS bits in PCI address are compared with base address, to decode
@@ -191,23 +201,23 @@
 
     // don't disable AM0 if GUEST bridge, otherwise there is no other way of accesing configuration space
     `ifdef HOST
-    	`define PCI_AM0 20'h0000_0
+    	`define PCI_AM0 24'h0000_00
     `else
-    	`define PCI_AM0 20'hE000_0
+    	`define PCI_AM0 24'hE000_00
     `endif
 
     `ifdef PCI_SPOCI
-        `define PCI_AM1 20'h0000_0
-        `define PCI_AM2 20'h0000_0
-        `define PCI_AM3 20'h0000_0
-        `define PCI_AM4 20'h0000_0
-        `define PCI_AM5 20'h0000_0
+        `define PCI_AM1 24'h0000_00
+        `define PCI_AM2 24'h0000_00
+        `define PCI_AM3 24'h0000_00
+        `define PCI_AM4 24'h0000_00
+        `define PCI_AM5 24'h0000_00
     `else
-        `define PCI_AM1 20'hE000_0
-        `define PCI_AM2 20'h0000_0
-        `define PCI_AM3 20'hE000_0
-        `define PCI_AM4 20'h0000_0
-        `define PCI_AM5 20'hE000_0
+        `define PCI_AM1 24'hE000_00
+        `define PCI_AM2 24'h0000_00
+        `define PCI_AM3 24'hE000_00
+        `define PCI_AM4 24'h0000_00
+        `define PCI_AM5 24'hE000_00
     `endif
 
     `define PCI_BA0_MEM_IO 1'b1 // considered only when PCI_IMAGE0 is used as general PCI-WB image!
@@ -217,6 +227,13 @@
     `define PCI_BA4_MEM_IO 1'b1
     `define PCI_BA5_MEM_IO 1'b0
 
+    `define TAR0_ADDR_MASK_0    32'hFFFF_F000 // when BA0 is used to access configuration space, this is NOT important!
+    `define TAR0_ADDR_MASK_1    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_2    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_3    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_4    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_5    32'hFFFF_F000
+
 `endif
 
 `ifdef PCI_DECODE_MED
@@ -224,19 +241,19 @@
         `define PCI_NUM_OF_DEC_ADDR_LINES 12
 
     `ifdef PCI_SPOCI
-        `define PCI_AM0 20'hfff0_0
-        `define PCI_AM1 20'h0000_0
-        `define PCI_AM2 20'h0000_0
-        `define PCI_AM3 20'h0000_0
-        `define PCI_AM4 20'h0000_0
-        `define PCI_AM5 20'h0000_0
+        `define PCI_AM0 24'hfff0_00
+        `define PCI_AM1 24'h0000_00
+        `define PCI_AM2 24'h0000_00
+        `define PCI_AM3 24'h0000_00
+        `define PCI_AM4 24'h0000_00
+        `define PCI_AM5 24'h0000_00
     `else
-        `define PCI_AM0 20'hfff0_0
-        `define PCI_AM1 20'h0000_0
-        `define PCI_AM2 20'hfff0_0
-        `define PCI_AM3 20'h0000_0
-        `define PCI_AM4 20'hfff0_0
-        `define PCI_AM5 20'h0000_0
+        `define PCI_AM0 24'hfff0_00
+        `define PCI_AM1 24'h0000_00
+        `define PCI_AM2 24'hfff0_00
+        `define PCI_AM3 24'h0000_00
+        `define PCI_AM4 24'hfff0_00
+        `define PCI_AM5 24'h0000_00
     `endif
 
         `define PCI_BA0_MEM_IO 1'b1 // considered only when PCI_IMAGE0 is used as general PCI-WB image!
@@ -246,34 +263,47 @@
         `define PCI_BA4_MEM_IO 1'b1
         `define PCI_BA5_MEM_IO 1'b0
 
+        `define TAR0_ADDR_MASK_0    32'hFFFF_F000 // when BA0 is used to access configuration space, this is NOT important!
+        `define TAR0_ADDR_MASK_1    32'hFFFF_F000
+        `define TAR0_ADDR_MASK_2    32'hFFFF_F000
+        `define TAR0_ADDR_MASK_3    32'hFFFF_F000
+        `define TAR0_ADDR_MASK_4    32'hFFFF_F000
+        `define TAR0_ADDR_MASK_5    32'hFFFF_F000
 `endif
 
 `ifdef PCI_DECODE_MAX
 
-    `define PCI_NUM_OF_DEC_ADDR_LINES 20
+    `define PCI_NUM_OF_DEC_ADDR_LINES 24
 
     `ifdef PCI_SPOCI
-        `define PCI_AM0 20'hffff_e
-        `define PCI_AM1 20'h0000_0
-        `define PCI_AM2 20'h0000_0
-        `define PCI_AM3 20'h0000_0
-        `define PCI_AM4 20'h0000_0
-        `define PCI_AM5 20'h0000_0
+        `define PCI_AM0 24'hffff_f0
+        `define PCI_AM1 24'h0000_00
+        `define PCI_AM2 24'h0000_00
+        `define PCI_AM3 24'h0000_00
+        `define PCI_AM4 24'h0000_00
+        `define PCI_AM5 24'h0000_00
     `else
-        `define PCI_AM0 20'hffff_e
-        `define PCI_AM1 20'hffff_c
-        `define PCI_AM2 20'hffff_8
-        `define PCI_AM3 20'hfffe_0
-        `define PCI_AM4 20'hfffc_0
-        `define PCI_AM5 20'hfff8_0
+        `define PCI_AM0 24'hffff_f0
+        `define PCI_AM1 24'hffff_ff
+        `define PCI_AM2 24'hffff_fe
+        `define PCI_AM3 24'hffff_e0
+        `define PCI_AM4 24'hffff_c0
+        `define PCI_AM5 24'hffff_80
     `endif
 
     `define PCI_BA0_MEM_IO 1'b0 // considered only when PCI_IMAGE0 is used as general PCI-WB image!
-    `define PCI_BA1_MEM_IO 1'b0
+    `define PCI_BA1_MEM_IO 1'b1
     `define PCI_BA2_MEM_IO 1'b1
-    `define PCI_BA3_MEM_IO 1'b1
+    `define PCI_BA3_MEM_IO 1'b0
     `define PCI_BA4_MEM_IO 1'b0
     `define PCI_BA5_MEM_IO 1'b0
+
+    `define TAR0_ADDR_MASK_0    32'hFFFF_F000 // when BA0 is used to access configuration space, this is NOT important!
+    `define TAR0_ADDR_MASK_1    32'hFFFF_FF00
+    `define TAR0_ADDR_MASK_2    32'hFFFF_FE00
+    `define TAR0_ADDR_MASK_3    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_4    32'hFFFF_F000
+    `define TAR0_ADDR_MASK_5    32'hFFFF_F000
 
 `endif        
     
@@ -340,20 +370,13 @@
         `define WB_PERIOD 4.5
     `endif
     
-    // values of image registers of PCI bridge device - valid are only upper 20 bits, others must be ZERO !
+    // values of image registers of PCI bridge device - valid are only upper 24 bits, others must be ZERO !
     `define TAR0_BASE_ADDR_0    32'h1000_0000
     `define TAR0_BASE_ADDR_1    32'h2000_0000
     `define TAR0_BASE_ADDR_2    32'h4000_0000
     `define TAR0_BASE_ADDR_3    32'h6000_0000
     `define TAR0_BASE_ADDR_4    32'h8000_0000
     `define TAR0_BASE_ADDR_5    32'hA000_0000
-    
-    `define TAR0_ADDR_MASK_0    32'hFFFF_F000 // when BA0 is used to access configuration space, this is NOT important!
-    `define TAR0_ADDR_MASK_1    32'hFFFF_F000
-    `define TAR0_ADDR_MASK_2    32'hFFFF_F000
-    `define TAR0_ADDR_MASK_3    32'hFFFF_F000
-    `define TAR0_ADDR_MASK_4    32'hFFFF_F000
-    `define TAR0_ADDR_MASK_5    32'hFFFF_F000
     
     `define TAR0_TRAN_ADDR_0    32'hC000_0000 // when BA0 is used to access configuration space, this is NOT important!
     `define TAR0_TRAN_ADDR_1    32'hA000_0000
@@ -390,12 +413,12 @@
 
     // other initial values
     // PCI Translation addresses
-    `define PCI_TA0 20'hffff_f
-    `define PCI_TA1 20'hffff_e
-    `define PCI_TA2 20'hffff_c
-    `define PCI_TA3 20'hffff_8
-    `define PCI_TA4 20'hffff_0
-    `define PCI_TA5 20'hfffe_0
+    `define PCI_TA0 24'hffff_f0
+    `define PCI_TA1 24'hffff_e0
+    `define PCI_TA2 24'hffff_c0
+    `define PCI_TA3 24'hffff_80
+    `define PCI_TA4 24'hffff_00
+    `define PCI_TA5 24'hfffe_00
 
     `define PCI_AT_EN0 1'b1
     `define PCI_AT_EN1 1'b0

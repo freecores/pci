@@ -42,6 +42,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2003/08/21 21:00:39  tadejm
+// Added support for WB B3. Some testcases were updated.
+//
 // Revision 1.5  2003/07/29 08:19:47  mihad
 // Found and simulated the problem in the synchronization logic.
 // Repaired the synchronization logic in the FIFOs.
@@ -106,7 +109,7 @@ reg     `WB_DATA_TYPE   DAT_O;
 Asynchronous dual-port RAM signals for storing and fetching the data
 ------------------------------------------------------------------------------------------------------*/
 //reg     `WB_DATA_TYPE wb_memory [0:16777215]; // WB memory - 24 addresses connected - 2 LSB not used
-reg     `WB_DATA_TYPE wb_memory [0:1048575]; // WB memory - 20 addresses connected - 2 LSB not used
+reg     `WB_DATA_TYPE wb_memory [0:(1 << 20) - 1]; // WB memory - 20 addresses connected - 2 LSB not used
 reg     `WB_DATA_TYPE mem_wr_data_out;
 reg     `WB_DATA_TYPE mem_rd_data_in;
 

@@ -5,19 +5,6 @@
 -messages
 -INCDIR ../../../bench/verilog
 -INCDIR ../../../rtl/verilog
--DEFINE REGRESSION
--DEFINE REGR_FIFO_SMALL_GENERIC
--DEFINE GUEST                       
--DEFINE PCI_DECODE_MAX              
--DEFINE WB_DECODE_MED               
--DEFINE PCI66                       
--DEFINE WB_CLK66                    
--DEFINE ACTIVE_HIGH_OE              
--DEFINE WB_CNF_BASE_ZERO            
--DEFINE NO_CNF_IMAGE                
--DEFINE PCI_CLOCK_FOLLOWS_WB_CLOCK=2
--DEFINE WB_DECODE_FAST      
--DEFINE DISABLE_COMPLETION_EXPIRED_TESTS
 -DEFINE PCI_CPCI_SIM
 ../../../rtl/verilog/pci_spoci_ctrl.v
 ../../../rtl/verilog/pci_parity_check.v

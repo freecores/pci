@@ -709,8 +709,8 @@ else
   grep -c "FAILED" ../log/pci_tb.log > ./result_fail.out
   grep -c "SUCCESSFULL" ../log/pci_tb.log > ./result_succ.out
   
-  set subtest_failed = `tail -1 result_fail.out`;
-  set sub_tests = `tail -1 result_succ.out`;
+  set subtest_failed = `tail -n 1 result_fail.out`;
+  set sub_tests = `tail -n 1 result_succ.out`;
   @ sub_tests = $sub_tests + $subtest_failed;
 
   if ($subtest_failed != 0) then
