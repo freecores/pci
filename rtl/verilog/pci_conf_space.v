@@ -43,6 +43,10 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.9  2004/08/19 15:27:34  mihad
+// Changed minimum pci image size to 256 bytes because
+// of some PC system problems with size of IO images.
+//
 // Revision 1.8  2004/07/07 12:45:01  mihad
 // Added SubsystemVendorID, SubsystemID, MAXLatency, MinGnt defines.
 // Enabled value loading from serial EEPROM for all of the above + VendorID and DeviceID registers.
@@ -447,40 +451,6 @@ PCI CONFIGURATION SPACE HEADER (type 00h) registers
 			parameter		r_interrupt_pin = 8'h01 ;
 			reg     [7 : 0] r_min_gnt   ;
             reg     [7 : 0] r_max_lat   ;
-
-
-/*###########################################################################################################
--------------------------------------------------------------------------------------------------------------
-PCI Bridge default image SIZE parameters
-	This parameters are not part of any register group, but are needed for default image size configuration
-	used in PCI Target and WISHBONE Slave configuration registers!
--------------------------------------------------------------------------------------------------------------
-###########################################################################################################*/
-
-/*-----------------------------------------------------------------------------------------------------------
-	PCI Target default image size parameters are defined with masked bits for address mask registers of
-	each image space. By default there are 1MByte of address space defined for def_pci_imageX_addr_map
-	parameters!
------------------------------------------------------------------------------------------------------------*/
-		wire	[19:0]	def_pci_image0_addr_map = `PCI_AM0 ; 
-		wire	[19:0]	def_pci_image1_addr_map = `PCI_AM1 ; 
-		wire	[19:0]	def_pci_image2_addr_map = `PCI_AM2 ; 
-		wire	[19:0]	def_pci_image3_addr_map = `PCI_AM3 ; 
-		wire	[19:0]	def_pci_image4_addr_map = `PCI_AM4 ; 
-		wire	[19:0]	def_pci_image5_addr_map = `PCI_AM5 ; 
-
-/*-----------------------------------------------------------------------------------------------------------
-	WISHBONE Slave default image size parameters are defined with masked bits for address mask registers
-	of each image space. By default there are 1MByte of address space defined for def_wb_imageX_addr_map
-	parameters except for def_wb_image0_addr_map which is used for configuration space!
------------------------------------------------------------------------------------------------------------*/
-			// PARAMETER	def_wb_image0_addr_map	IMPLEMENTED as r_wb_am0 parameter for CONF. space !!!
-		wire	[19:0]	def_wb_image1_addr_map = `WB_AM1 ; 
-		wire	[19:0]	def_wb_image2_addr_map = `WB_AM2 ;
-		wire	[19:0]	def_wb_image3_addr_map = `WB_AM3 ;
-		wire	[19:0]	def_wb_image4_addr_map = `WB_AM4 ;
-		wire	[19:0]	def_wb_image5_addr_map = `WB_AM5 ;
-
 
 /*###########################################################################################################
 -------------------------------------------------------------------------------------------------------------
