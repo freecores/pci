@@ -43,6 +43,10 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.18  2004/08/19 15:27:34  mihad
+// Changed minimum pci image size to 256 bytes because
+// of some PC system problems with size of IO images.
+//
 // Revision 1.17  2004/01/24 11:54:18  mihad
 // Update! SPOCI Implemented!
 //
@@ -670,7 +674,14 @@ wire            out_bckp_perr_en_out ;
 wire            out_bckp_serr_out ;
 wire            out_bckp_serr_en_out ;
 
-
+wire            int_pci_frame   = out_bckp_frame_en_out ? out_bckp_frame_out  : pci_frame_i     ;
+wire            int_pci_irdy    = out_bckp_irdy_en_out  ? out_bckp_irdy_out   : pci_irdy_i      ;
+wire            int_pci_devsel  = out_bckp_trdy_en_out  ? out_bckp_devsel_out : pci_devsel_i    ;
+wire            int_pci_trdy    = out_bckp_trdy_en_out  ? out_bckp_trdy_out   : pci_trdy_i      ;
+wire            int_pci_stop    = out_bckp_trdy_en_out  ? out_bckp_stop_out   : pci_stop_i      ;
+wire    [ 3: 0] int_pci_cbe     = out_bckp_cbe_en_out   ? out_bckp_cbe_out    : pci_cbe_i       ;
+wire            int_pci_par     = out_bckp_par_en_out   ? out_bckp_par_out    : pci_par_i       ;
+wire            int_pci_perr    = out_bckp_perr_en_out  ? out_bckp_perr_out   : pci_perr_i      ;
 // PARITY CHECKER OUTPUTS
 wire    parchk_pci_par_out ;
 wire    parchk_pci_par_en_out ;
@@ -891,9 +902,9 @@ wire    [7:0]   wbu_cache_line_size_in                  =   conf_cache_line_size
 wire            wbu_pciif_gnt_in                        = pci_gnt_i ;
 wire            wbu_pciif_frame_in                      = in_reg_frame_out ;
 wire            wbu_pciif_irdy_in                       = in_reg_irdy_out ;
-wire            wbu_pciif_trdy_in                       = pci_trdy_i ;
-wire            wbu_pciif_stop_in                       = pci_stop_i ;
-wire            wbu_pciif_devsel_in                     = pci_devsel_i ;
+wire            wbu_pciif_trdy_in                       = int_pci_trdy  ;
+wire            wbu_pciif_stop_in                       = int_pci_stop  ;
+wire            wbu_pciif_devsel_in                     = int_pci_devsel ;
 wire    [31:0]  wbu_pciif_ad_reg_in                     = in_reg_ad_out ;
 wire            wbu_pciif_trdy_reg_in                   = in_reg_trdy_out ;
 wire            wbu_pciif_stop_reg_in                   = in_reg_stop_out ;
@@ -1070,15 +1081,15 @@ wire    [pci_ba1_5_width - 1:0] pciu_ta5_in  =   conf_pci_ta5_out ;
 wire    [7:0]   pciu_cache_line_size_in                 =   conf_cache_line_size_to_wb_out ;
 wire            pciu_cache_lsize_not_zero_in            =   conf_cache_lsize_not_zero_to_wb_out ;
 
-wire            pciu_pciif_frame_in                     =   pci_frame_i ;
-wire            pciu_pciif_irdy_in                      =   pci_irdy_i ;
+wire            pciu_pciif_frame_in                     =   int_pci_frame   ;
+wire            pciu_pciif_irdy_in                      =   int_pci_irdy    ;
 wire            pciu_pciif_idsel_in                     =   pci_idsel_i ;
 wire            pciu_pciif_frame_reg_in                 =   in_reg_frame_out ;
 wire            pciu_pciif_irdy_reg_in                  =   in_reg_irdy_out ;
 wire            pciu_pciif_idsel_reg_in                 =   in_reg_idsel_out ;
 wire    [31:0]  pciu_pciif_ad_reg_in                    =   in_reg_ad_out ;
 wire    [3:0]   pciu_pciif_cbe_reg_in                   =   in_reg_cbe_out ;
-wire    [3:0]   pciu_pciif_cbe_in                       =   pci_cbe_i ;
+wire    [3:0]   pciu_pciif_cbe_in                       =   int_pci_cbe ;
 
 wire            pciu_pciif_bckp_trdy_en_in              =   out_bckp_trdy_en_out ;
 wire            pciu_pciif_bckp_devsel_in               =   out_bckp_devsel_out ;
@@ -1403,10 +1414,10 @@ wire            pci_mux_serr_en_in          = parchk_pci_serr_en_out;
 wire            pci_mux_req_in              =   wbu_pciif_req_out ;
 wire            pci_mux_frame_load_in       =   wbu_pciif_frame_load_out ;
 
-wire            pci_mux_pci_irdy_in         =   pci_irdy_i ;
-wire            pci_mux_pci_trdy_in         =   pci_trdy_i ;
-wire            pci_mux_pci_frame_in        =   pci_frame_i ;
-wire            pci_mux_pci_stop_in         =   pci_stop_i ;
+wire            pci_mux_pci_irdy_in         =   int_pci_irdy    ;
+wire            pci_mux_pci_trdy_in         =   int_pci_trdy    ;
+wire            pci_mux_pci_frame_in        =   int_pci_frame   ;
+wire            pci_mux_pci_stop_in         =   int_pci_stop    ;
 
 wire            pci_mux_init_complete_in    =   conf_pci_init_complete_out ;
 
@@ -1534,8 +1545,8 @@ pci_cur_out_reg output_backup
 ) ;
 
 // PARITY CHECKER INPUTS
-wire            parchk_pci_par_in               =   pci_par_i ;
-wire            parchk_pci_perr_in              =   pci_perr_i ;
+wire            parchk_pci_par_in               =   int_pci_par ;
+wire            parchk_pci_perr_in              =   int_pci_perr ;
 wire            parchk_pci_frame_reg_in         =   in_reg_frame_out ;
 wire            parchk_pci_frame_en_in          =   out_bckp_frame_en_out ;
 wire            parchk_pci_irdy_en_in           =   out_bckp_irdy_en_out ;
@@ -1548,7 +1559,7 @@ wire            parchk_pci_trdy_en_in           =   out_bckp_trdy_en_out ;
 
 wire    [31:0]  parchk_pci_ad_out_in            =   out_bckp_ad_out ;
 wire    [31:0]  parchk_pci_ad_reg_in            =   in_reg_ad_out ;
-wire    [3:0]   parchk_pci_cbe_in_in            =   pci_cbe_i ;
+wire    [3:0]   parchk_pci_cbe_in_in            =   int_pci_cbe   ;
 wire    [3:0]   parchk_pci_cbe_reg_in           =   in_reg_cbe_out ;
 wire    [3:0]   parchk_pci_cbe_out_in           =   out_bckp_cbe_out ;
 wire            parchk_pci_ad_en_in             =   out_bckp_ad_en_out ;
@@ -1599,14 +1610,14 @@ pci_parity_check parity_checker
 );
 
 wire            in_reg_gnt_in    = pci_gnt_i ;
-wire            in_reg_frame_in  = pci_frame_i ;
-wire            in_reg_irdy_in   = pci_irdy_i ;
-wire            in_reg_trdy_in   = pci_trdy_i ;
-wire            in_reg_stop_in   = pci_stop_i ;
-wire            in_reg_devsel_in = pci_devsel_i ;
+wire            in_reg_frame_in  = int_pci_frame ;
+wire            in_reg_irdy_in   = int_pci_irdy  ;
+wire            in_reg_trdy_in   = int_pci_trdy  ;
+wire            in_reg_stop_in   = int_pci_stop  ;
+wire            in_reg_devsel_in = int_pci_devsel ;
 wire            in_reg_idsel_in  = pci_idsel_i ;
 wire    [31:0]  in_reg_ad_in     = pci_ad_i ;
-wire    [3:0]   in_reg_cbe_in    = pci_cbe_i ;
+wire    [3:0]   in_reg_cbe_in    = int_pci_cbe ;
 
 pci_in_reg input_register
 (
