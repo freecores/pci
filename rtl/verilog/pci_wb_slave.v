@@ -42,6 +42,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
 // Revision 1.4  2003/12/19 11:11:30  mihad
 // Compact PCI Hot Swap support added.
 // New testcases added.
@@ -79,6 +82,8 @@
 `include "timescale.v"
 // synopsys translate_on
 
+
+
 module pci_wb_slave
                (    wb_clock_in,
                     reset_in,
@@ -115,6 +120,7 @@ module pci_wb_slave
                     wbw_fifo_control_out,
                     wbw_fifo_almost_full_in,
                     wbw_fifo_full_in,
+					wbw_fifo_half_full_in, //Robert, burst issue
                     wbr_fifo_renable_out,
                     wbr_fifo_be_in,
                     wbr_fifo_data_in,
@@ -245,6 +251,7 @@ output       wbw_fifo_wenable_out ;    // write enable for WBW_FIFO output
 output [3:0] wbw_fifo_control_out ;    // control bus output for WBW_FIFO
 input        wbw_fifo_almost_full_in ; // almost full status indicator from WBW_FIFO
 input        wbw_fifo_full_in ;        // full status indicator from WBW_FIFO
+input        wbw_fifo_half_full_in;    //Robert, burst issue
 
 /*----------------------------------------------------------------------------------------------------------------------
 WBR_FIFO control signals used for fetching data from WBR_FIFO and status monitoring
@@ -357,7 +364,13 @@ Write allow for image accesses. Writes through images are allowed when all of fo
 - delayed read from PCI to WISHBONE completion musn't be present
 - lock input musn't be set - it can be set because of error reporting or because PCI master state machine is disabled
 ===================================================================================================================================================================================*/
-wire wimg_wallow           = ~|{ wbw_fifo_almost_full_in , wbw_fifo_full_in, wb_del_req_pending_in, pci_drcomp_pending_in, wbs_lock_in } ;
+//Robert, burst issue
+//`ifdef BURST_ISSUE
+wire wimg_wallow           = ~|{ wbw_fifo_half_full_in, wb_del_req_pending_in, pci_drcomp_pending_in, wbs_lock_in } ;
+//`else
+//wire wimg_wallow           = ~|{ wbw_fifo_almost_full_in , wbw_fifo_full_in, wb_del_req_pending_in, pci_drcomp_pending_in, wbs_lock_in } ;
+//`endif
+
 reg img_wallow ;
 /*===================================================================================================================================================================================
 WISHBONE slave can request an image read accesses when all of following are true:
@@ -824,7 +837,6 @@ begin
                         wbw_data_out_sel = SEL_DATA_IN ;
                         err = 1'b0 ;
                         rty = burst_transfer && wattempt && (wbw_fifo_almost_full_in || wbw_fifo_full_in) ;
-
                         if ( ~burst_transfer || wattempt && ( wbw_fifo_almost_full_in || wbw_fifo_full_in ) )
                         begin
                             n_state = S_IDLE ;
