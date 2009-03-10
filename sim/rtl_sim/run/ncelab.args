@@ -1,0 +1,42 @@
+//
+// ncelab.args: Arguments passed to the NC-Verilog elaborator.
+// Created by ncprep on Tue Jan 29 18:18:34 2002
+
+// Turn on informative messages.
+-MESSAGES
+// -NOCOPYRIGHT
+
+// Uncomment the following line to generate a named log file
+// -LOGFILE ncelab.log
+
+// Top level module(s)
+CBE_EN_CRIT
+PCI_TPRAM
+CONF_CYC_ADDR_DEC
+FRAME_CRIT
+PCI_TARGET32_CLK_EN
+FRAME_EN_CRIT
+PAR_CRIT
+FRAME_LOAD_CRIT
+PCI_TARGET32_DEVS_CRIT
+PERR_CRIT
+PCI_DECODER
+PERR_EN_CRIT
+DECODER
+SERR_CRIT
+IRDY_OUT_CRIT
+PCI_IO_MUX
+PCI_IO_MUX_AD_EN_CRIT
+PCI_IO_MUX_AD_LOAD_CRIT
+SERR_EN_CRIT
+MAS_AD_EN_CRIT
+MAS_AD_LOAD_CRIT
+PCI_TARGET32_STOP_CRIT
+synchronizer_flop
+MAS_CH_STATE_CRIT
+PCI_TARGET32_TRDY_CRIT
+TOP
+PCI_RST_INT
+SYNC_MODULE
+WB_TPRAM
+
