@@ -1,0 +1,125 @@
+#-- Synplicity, Inc.
+#-- Version Amplify 3.1         
+#-- Project file /shared/projects/pci/mihad/pci/apps/crt/syn/synplify/pci_crt.prj
+#-- Written on Fri Sep 27 16:20:50 2002
+
+
+#add_file options
+add_file -verilog "$LIB/xilinx/virtex.v"
+add_file -verilog "../../../../rtl/verilog/async_reset_flop.v"
+add_file -verilog "../../../../rtl/verilog/cbe_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/conf_cyc_addr_dec.v"
+add_file -verilog "../../../../rtl/verilog/conf_space.v"
+add_file -verilog "../../../../rtl/verilog/cur_out_reg.v"
+add_file -verilog "../../../../rtl/verilog/decoder.v"
+add_file -verilog "../../../../rtl/verilog/delayed_sync.v"
+add_file -verilog "../../../../rtl/verilog/delayed_write_reg.v"
+add_file -verilog "../../../../rtl/verilog/fifo_control.v"
+add_file -verilog "../../../../rtl/verilog/frame_crit.v"
+add_file -verilog "../../../../rtl/verilog/frame_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/frame_load_crit.v"
+add_file -verilog "../../../../rtl/verilog/irdy_out_crit.v"
+add_file -verilog "../../../../rtl/verilog/mas_ad_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/mas_ad_load_crit.v"
+add_file -verilog "../../../../rtl/verilog/mas_ch_state_crit.v"
+add_file -verilog "../../../../rtl/verilog/out_reg.v"
+add_file -verilog "../../../../rtl/verilog/par_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_bridge32.v"
+add_file -verilog "../../../../rtl/verilog/pci_decoder.v"
+add_file -verilog "../../../../rtl/verilog/pci_in_reg.v"
+add_file -verilog "../../../../rtl/verilog/pci_io_mux_ad_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_io_mux_ad_load_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_io_mux.v"
+add_file -verilog "../../../../rtl/verilog/pci_master32_sm_if.v"
+add_file -verilog "../../../../rtl/verilog/pci_master32_sm.v"
+add_file -verilog "../../../../rtl/verilog/pci_parity_check.v"
+add_file -verilog "../../../../rtl/verilog/pci_ram_16x40d.v"
+add_file -verilog "../../../../rtl/verilog/pci_rst_int.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_clk_en.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_devs_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_interface.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_sm.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_stop_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_target32_trdy_crit.v"
+add_file -verilog "../../../../rtl/verilog/pci_target_unit.v"
+add_file -verilog "../../../../rtl/verilog/pci_tpram.v"
+add_file -verilog "../../../../rtl/verilog/pciw_fifo_control.v"
+add_file -verilog "../../../../rtl/verilog/pciw_pcir_fifos.v"
+add_file -verilog "../../../../rtl/verilog/perr_crit.v"
+add_file -verilog "../../../../rtl/verilog/perr_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/serr_crit.v"
+add_file -verilog "../../../../rtl/verilog/serr_en_crit.v"
+add_file -verilog "../../../../rtl/verilog/synchronizer_flop.v"
+add_file -verilog "../../../../rtl/verilog/sync_module.v"
+add_file -verilog "../../../../rtl/verilog/wb_addr_mux.v"
+add_file -verilog "../../../../rtl/verilog/wb_master.v"
+add_file -verilog "../../../../rtl/verilog/wbr_fifo_control.v"
+add_file -verilog "../../../../rtl/verilog/wb_slave_unit.v"
+add_file -verilog "../../../../rtl/verilog/wb_slave.v"
+add_file -verilog "../../../../rtl/verilog/wb_tpram.v"
+add_file -verilog "../../../../rtl/verilog/wbw_fifo_control.v"
+add_file -verilog "../../../../rtl/verilog/wbw_wbr_fifos.v"
+add_file -verilog "../../rtl/verilog/crtc_iob.v"
+add_file -verilog "../../rtl/verilog/ssvga_crtc.v"
+add_file -verilog "../../rtl/verilog/ssvga_fifo.v"
+add_file -verilog "../../rtl/verilog/ssvga_top.v"
+add_file -verilog "../../rtl/verilog/ssvga_wbm_if.v"
+add_file -verilog "../../rtl/verilog/ssvga_wbs_if.v"
+add_file -constraint "pci_crt.sdc"
+add_file -verilog "/shared/projects/pci/mihad/pci/rtl/verilog/meta_flop.v"
+add_file -verilog "../../rtl/verilog/top.v"
+
+#reporting options
+
+
+#implementation: "rev_1"
+impl -add rev_1
+
+#device options
+set_option -technology SPARTAN2
+set_option -part XC2S150
+set_option -package PQ208
+set_option -speed_grade -5
+
+#compilation/mapping options
+set_option -default_enum_encoding default
+set_option -symbolic_fsm_compiler 0
+set_option -resource_sharing 0
+set_option -use_fsm_explorer 0
+
+#map options
+set_option -frequency 50.000
+set_option -fanout_limit 50
+set_option -disable_io_insertion 0
+set_option -pipe 0
+set_option -fixgatedclocks 0
+set_option -retiming 0
+set_option -modular 0
+
+#simulation options
+set_option -write_verilog 0
+set_option -write_vhdl 0
+
+#automatic place and route (vendor) options
+set_option -write_apr_constraint 1
+
+#set result format/file last
+project -result_file "rev_1/top.edf"
+
+#implementation attributes
+set_option -vlog_std v95
+set_option -compiler_compatible 0
+set_option -random_floorplan 0
+set_option -include_path "../../../../rtl/verilog/;../../rtl/verilog/"
+
+#netlist optimizer options
+set_option -enable_nfilter 0
+set_option -feedthrough 1
+set_option -constant_prop 1
+set_option -level_hierarchy 0
+
+#physical constraint options
+set_option -floorplan ""
+set_option -nfilter_user_path ""
+set_option -pin_assignment ""
+impl -active "rev_1"
