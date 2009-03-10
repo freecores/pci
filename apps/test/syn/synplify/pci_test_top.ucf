@@ -1,0 +1,28 @@
+INST "i_clkdll" CLKDV_DIVIDE = 2.0 ;
+INST "i_clkdll" LOC = DLL0 ;
+INST "i_bufg_clk0" LOC = GCLKBUF0 ;
+INST "i_bufg_wb_clk" LOC = GCLKBUF1 ;
+NET "pci_clk_pad_i" TNM_NET = "pci_clk_pad_i";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/i_synchronizer_reg_inGreyCount/sync_data_out[*]"                TNM = "wbw_sync_to_pci_clk";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/i_synchronizer_reg_wgrey_next/sync_data_out[*]"   TNM = "wbw_sync_to_pci_clk";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/pci_clk_inGreyCount[*]"                                         TNM = "wbw_pci_clk_grey_addr_dest";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/rclk_wgrey_next[*]"                               TNM = "wbw_pci_clk_grey_addr_dest";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/i_synchronizer_reg_rgrey_addr/sync_data_out[*]"   TNM = "wbw_sync_to_wb_clk";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/i_synchronizer_reg_rgrey_minus1/sync_data_out[*]" TNM = "wbw_sync_to_wb_clk";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/wclk_rgrey_addr[*]"                               TNM = "wbw_wb_clk_grey_addr_dest";
+#INST "i_pci_bridge32/wishbone_slave_unit/fifos/wbw_fifo_ctrl/wclk_rgrey_minus1[*]"                             TNM = "wbw_wb_clk_grey_addr_dest";
+#
+#TIMESPEC "TS_wbw_wb2pci_sync" = FROM "wbw_sync_to_pci_clk" TO "wbw_pci_clk_grey_addr_dest" 4 ns;
+#TIMESPEC "TS_wbw_pci2wb_sync" = FROM "wbw_sync_to_wb_clk" TO "wbw_wb_clk_grey_addr_dest" 4 ns;
+
+#INST "i_pci_bridge32/pci_target_unit/fifos/i_synchronizer_reg_inGreyCount/sync_data_out[*]"                 TNM = "pciw_sync_to_wb_clk"         ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/i_synchronizer_reg_wgrey_addr/sync_data_out[*]"   TNM = "pciw_sync_to_wb_clk"         ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/rclk_wgrey_addr[*]"                               TNM = "pciw_wb_clk_grey_addr_dest"  ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/wb_clk_inGreyCount[*]"                                           TNM = "pciw_wb_clk_grey_addr_dest"  ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/i_synchronizer_reg_rgrey_addr/sync_data_out[*]"   TNM = "pciw_sync_to_pci_clk"        ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/i_synchronizer_reg_rgrey_minus2/sync_data_out[*]" TNM = "pciw_sync_to_pci_clk"        ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/wclk_rgrey_addr[*]"                               TNM = "pciw_pci_clk_grey_addr_dest" ;
+#INST "i_pci_bridge32/pci_target_unit/fifos/pciw_fifo_ctrl/wclk_rgrey_minus2[*]"                             TNM = "pciw_pci_clk_grey_addr_dest" ;
+#
+#TIMESPEC "TS_pciw_wb2pci_sync" = FROM "pciw_sync_to_pci_clk" TO "pciw_pci_clk_grey_addr_dest" 4 ns;
+#TIMESPEC "TS_pciw_pci2wb_sync" = FROM "pciw_sync_to_wb_clk" TO "pciw_wb_clk_grey_addr_dest" 4 ns;
