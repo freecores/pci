@@ -1,0 +1,8 @@
+-snapshot worklib.bridge32:fun 
+-cdslib ../bin/cds.lib 
+-logfile ../log/ncelab_xilinx.log 
+-access +wc 
+-messages 
+-no_tchk_msg 
+-v93 
+worklib.SYSTEM worklib.glbl 
