@@ -1,0 +1,185 @@
+ncelab: v03.30.(p001): (c) Copyright 1995 - 2001 Cadence Design Systems, Inc.
+ncelab: *W,DLNOHV: Unable to find an 'hdl.var' file to load in.
+ncelab: v03.30.(p001): Started on Jul 08, 2001 at 11:28:46
+ncelab
+    -f ../bin/ncelab_xilinx.args
+        -snapshot worklib.bridge32:fun
+        -cdslib ../bin/cds.lib
+        -logfile ../log/ncelab_xilinx.log
+        -access +wc
+        -messages
+        -no_tchk_msg
+        -v93
+        worklib.SYSTEM
+        worklib.glbl
+
+	Elaborating the design hierarchy:
+		Caching library 'worklib' ....... Done
+		Caching library 'std' ....... Done
+		Caching library 'synopsys' ....... Done
+		Caching library 'ieee' ....... Done
+		Caching library 'ambit' ....... Done
+		Caching library 'vital_memory' ....... Done
+ncelab: *W,CUSRCH: Resolved module/udp 'TOP' at 'bridge32_top' to 'worklib.TOP:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_BRIDGE32' at 'bridge' to 'worklib.PCI_BRIDGE32:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_RST_INT' at 'pci_resets_and_interrupts' to 'worklib.PCI_RST_INT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_SLAVE_UNIT' at 'wishbone_slave_unit' to 'worklib.WB_SLAVE_UNIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_SLAVE' at 'wishbone_slave' to 'worklib.WB_SLAVE:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'async_reset_flop' at 'async_reset_as_wbr_flush' to 'worklib.async_reset_flop:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WBW_WBR_FIFOS' at 'fifos' to 'worklib.WBW_WBR_FIFOS:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_TPRAM' at 'wbu_fifo_storage' to 'worklib.WB_TPRAM:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'RAMB4_S16_S16' at 'ramb4_s16_s16_0' to 'worklib.RAMB4_S16_S16:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WBW_FIFO_CONTROL' at 'wbw_fifo_ctrl' to 'worklib.WBW_FIFO_CONTROL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WBR_FIFO_CONTROL' at 'wbr_fifo_ctrl' to 'worklib.WBR_FIFO_CONTROL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_ADDR_MUX' at 'wb_addr_dec' to 'worklib.WB_ADDR_MUX:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'DECODER' at 'dec0' to 'worklib.DECODER:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'DELAYED_SYNC' at 'del_sync' to 'worklib.DELAYED_SYNC:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'synchronizer_flop' at 'req_sync' to 'worklib.synchronizer_flop:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'DELAYED_WRITE_REG' at 'delayed_write_data' to 'worklib.DELAYED_WRITE_REG:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'CONF_CYC_ADDR_DEC' at 'ccyc_addr_dec' to 'worklib.CONF_CYC_ADDR_DEC:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_MASTER32_SM_IF' at 'pci_initiator_if' to 'worklib.PCI_MASTER32_SM_IF:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_MASTER32_SM' at 'pci_initiator_sm' to 'worklib.PCI_MASTER32_SM:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'FRAME_CRIT' at 'frame_iob_feed' to 'worklib.FRAME_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'FRAME_LOAD_CRIT' at 'frame_iob_ce' to 'worklib.FRAME_LOAD_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'IRDY_OUT_CRIT' at 'irdy_iob_feed' to 'worklib.IRDY_OUT_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'MAS_AD_LOAD_CRIT' at 'mas_ad_load_feed' to 'worklib.MAS_AD_LOAD_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'MAS_CH_STATE_CRIT' at 'state_machine_ce' to 'worklib.MAS_CH_STATE_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'MAS_AD_EN_CRIT' at 'ad_iob_oe_feed' to 'worklib.MAS_AD_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'CBE_EN_CRIT' at 'cbe_iob_feed' to 'worklib.CBE_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'FRAME_EN_CRIT' at 'frame_iob_en_feed' to 'worklib.FRAME_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET_UNIT' at 'pci_target_unit' to 'worklib.PCI_TARGET_UNIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_MASTER' at 'wishbone_master' to 'worklib.WB_MASTER:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCIW_PCIR_FIFOS' at 'fifos' to 'worklib.PCIW_PCIR_FIFOS:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TPRAM' at 'pciu_fifo_storage' to 'worklib.PCI_TPRAM:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCIW_FIFO_CONTROL' at 'pciw_fifo_ctrl' to 'worklib.PCIW_FIFO_CONTROL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'FIFO_CONTROL' at 'pcir_fifo_ctrl' to 'worklib.FIFO_CONTROL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_INTERFACE' at 'pci_target_if' to 'worklib.PCI_TARGET32_INTERFACE:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_DECODER' at 'decoder0' to 'worklib.PCI_DECODER:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_SM' at 'pci_target_sm' to 'worklib.PCI_TARGET32_SM:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_CLK_EN' at 'pci_target_clock_en' to 'worklib.PCI_TARGET32_CLK_EN:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_TRDY_CRIT' at 'pci_target_trdy_critical' to 'worklib.PCI_TARGET32_TRDY_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_STOP_CRIT' at 'pci_target_stop_critical' to 'worklib.PCI_TARGET32_STOP_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_TARGET32_DEVS_CRIT' at 'pci_target_devsel_critical' to 'worklib.PCI_TARGET32_DEVS_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'CONF_SPACE' at 'configuration' to 'worklib.CONF_SPACE:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'SYNC_MODULE' at 'sync_status_15' to 'worklib.SYNC_MODULE:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_IO_MUX' at 'pci_io_mux' to 'worklib.PCI_IO_MUX:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_IO_MUX_AD_EN_CRIT' at 'ad_en_low_gen' to 'worklib.PCI_IO_MUX_AD_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_IO_MUX_AD_LOAD_CRIT' at 'ad_load_low_gen' to 'worklib.PCI_IO_MUX_AD_LOAD_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'OUT_REG' at 'ad_iob0' to 'worklib.OUT_REG:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'CUR_OUT_REG' at 'output_backup' to 'worklib.CUR_OUT_REG:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_PARITY_CHECK' at 'parity_checker' to 'worklib.PCI_PARITY_CHECK:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PAR_CRIT' at 'par_gen' to 'worklib.PAR_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PERR_CRIT' at 'perr_crit_gen' to 'worklib.PERR_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PERR_EN_CRIT' at 'perr_en_crit_gen' to 'worklib.PERR_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'SERR_EN_CRIT' at 'serr_en_crit_gen' to 'worklib.SERR_EN_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'SERR_CRIT' at 'serr_crit_gen' to 'worklib.SERR_CRIT:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_IN_REG' at 'input_register' to 'worklib.PCI_IN_REG:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_MASTER_BEHAVIORAL' at 'wishbone_master' to 'worklib.WB_MASTER_BEHAVIORAL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_MASTER32' at 'wbm_low_level' to 'worklib.WB_MASTER32:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_SLAVE_BEHAVIORAL' at 'wishbone_slave' to 'worklib.WB_SLAVE_BEHAVIORAL:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'WB_BUS_MON' at 'wbu_wb_mon' to 'worklib.WB_BUS_MON:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'PCI_BEHAVIORAL_IACK_TARGET' at 'interrupt_control' to 'worklib.PCI_BEHAVIORAL_IACK_TARGET:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_blue_arbiter' at 'pci_arbiter' to 'worklib.pci_blue_arbiter:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_bus_monitor' at 'monitor32' to 'worklib.pci_bus_monitor:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_behaviorial_device' at 'pci_behaviorial_device2' to 'worklib.pci_behaviorial_device:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'delayed_test_pad' at 'test_pad_idsel' to 'worklib.delayed_test_pad:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_behaviorial_master' at 'pci_behaviorial_master' to 'worklib.pci_behaviorial_master:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_behaviorial_target' at 'pci_behaviorial_target' to 'worklib.pci_behaviorial_target:v' through a global search of all libraries.
+ncelab: *W,CUSRCH: Resolved module/udp 'pci_unsupported_commands_master' at 'ipci_unsupported_commands_master' to 'worklib.pci_unsupported_commands_master:v' through a global search of all libraries.
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+ncvlog_cg: *W,DLNOHV: Unable to find an 'hdl.var' file to load in.
+		worklib.CONF_SPACE:v <0x0b94681b>
+			streams: 326, words: 214980
+		worklib.CUR_OUT_REG:v <0x1b46af3b>
+			streams:  14, words: 12410
+		worklib.DECODER:v <0x13eed9a0>
+			streams:   5, words:  1312
+		worklib.DELAYED_SYNC:v <0x12aeb454>
+			streams:  71, words: 38659
+		worklib.DELAYED_WRITE_REG:v <0x581d4f6b>
+			streams:   3, words:  1713
+		worklib.FIFO_CONTROL:v <0x3d7bd605>
+			streams:  69, words: 32922
+		worklib.OUT_REG:v <0x6d0573e7>
+			streams:   7, words:  3682
+		worklib.PCIW_FIFO_CONTROL:v <0x52ce88f3>
+			streams:  77, words: 36940
+		worklib.PCIW_PCIR_FIFOS:v <0x33af8401>
+			streams:  40, words: 18748
+		worklib.PCI_BEHAVIORAL_IACK_TARGET:v <0x695fdcdb>
+			streams:  21, words: 17778
+		worklib.PCI_BRIDGE32:v <0x7ca58dc1>
+			streams: 206, words: 42780
+		worklib.PCI_DECODER:v <0x2d144063>
+			streams:  11, words:  3345
+		worklib.PCI_IN_REG:v <0x1f2391c6>
+			streams:   3, words:  3896
+		worklib.PCI_MASTER32_SM:v <0x3b4243d3>
+			streams:  67, words: 31920
+		worklib.PCI_MASTER32_SM_IF:v <0x14434636>
+			streams: 109, words: 58229
+		worklib.PCI_PARITY_CHECK:v <0x5375754f>
+			streams:  31, words: 19706
+		worklib.PCI_RST_INT:v <0x784f9aad>
+			streams:   5, words:  1145
+		worklib.PCI_TARGET32_INTERFACE:v <0x3a165b7c>
+			streams:  87, words: 38519
+		worklib.PCI_TARGET32_SM:v <0x1157bb20>
+			streams:  90, words: 43531
+		worklib.PCI_TARGET_UNIT:v <0x1e614116>
+			streams: 155, words: 28552
+		worklib.PCI_TPRAM:v <0x54656300>
+			streams:   5, words:  2144
+		worklib.SYSTEM:v <0x75824752>
+			streams: 489, words: 6741109
+		worklib.TOP:v <0x65b0ddc8>
+			streams:  11, words:  2032
+		worklib.WBR_FIFO_CONTROL:v <0x73d8b658>
+			streams:  40, words: 19364
+		worklib.WBW_FIFO_CONTROL:v <0x544803ed>
+			streams:  57, words: 28270
+		worklib.WBW_WBR_FIFOS:v <0x04e9157b>
+			streams:  40, words: 18655
+		worklib.WB_ADDR_MUX:v <0x3674d249>
+			streams:   8, words:  4891
+		worklib.WB_BUS_MON:v <0x790f9213>
+			streams:  14, words: 26983
+		worklib.WB_MASTER32:v <0x469cd404>
+			streams:  14, words: 35824
+		worklib.WB_MASTER:v <0x2b214722>
+			streams: 345, words: 135374
+		worklib.WB_MASTER_BEHAVIORAL:v <0x1bef0005>
+			streams:   6, words: 62673
+		worklib.WB_SLAVE:v <0x11e0d5b0>
+			streams:  63, words: 58003
+		worklib.WB_SLAVE_BEHAVIORAL:v <0x3659dc82>
+			streams:  28, words: 19354
+		worklib.WB_SLAVE_UNIT:v <0x7347bad8>
+			streams: 144, words: 25991
+		worklib.WB_TPRAM:v <0x54656300>
+			streams:   5, words:  2144
+		worklib.async_reset_flop:v <0x64e32b7e>
+			streams:   3, words:  1624
+		worklib.pci_unsupported_commands_master:v <0x0eb9f028>
+			streams:  19, words: 24432
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                  Instances  Unique
+		Modules:                199      68
+		Primitives:             783       3
+		Timing outputs:         192      32
+		Registers:             2111    1509
+		Scalar wires:          1994       -
+		Expanded wires:         618      37
+		Vectored wires:         531       -
+		Always blocks:          582     297
+		Initial blocks:          27      15
+		Parallel blocks:        139     139
+		Cont. assignments:     1282    1272
+		Pseudo assignments:     308     597
+		Timing checks:           24       8
+		Simulation timescale:   1ps
+	Writing initial simulation snapshot: worklib.bridge32:fun
+ncelab: v03.30.(p001): Exiting on Jul 08, 2001 at 11:29:03  (total: 00:00:17)
