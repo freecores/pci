@@ -1,0 +1,5 @@
+Known issues for current RTL version:
+
+-  PCI Bridge's WISHBONE Master doesn't work properly,
+   when REGISTER_WBM_OUTPUTS is defined and WISHBONE Slave connected to it
+   operates with 0 wait cycles.
